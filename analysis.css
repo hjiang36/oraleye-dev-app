@@ -1,0 +1,20 @@
+#infoSidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 200px;
+    /* Width of the sidebar */
+    height: 100vh;
+    /* Full height */
+    background-color: #f7f7f5;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Add scroll for overflow content */
+    padding: 20px;
+}
+
+#closeInfoSidebar {
+    cursor: pointer;
+    font-size: 2rem;
+    color: gray;
+}

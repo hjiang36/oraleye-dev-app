@@ -1,0 +1,31 @@
+#userSearch {
+  margin-bottom: 10px;
+}
+
+.dob {
+  font-size: 0.8rem;
+}
+
+.user-details {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.patient-item {
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+.patient-item:hover {
+  cursor: pointer;
+  background-color: #efefef;
+}
+
+.new-capture-btn {
+  display: none;
+  border: none;
+}
+
+.patient-item:hover .new-capture-btn {
+  display: block;
+}

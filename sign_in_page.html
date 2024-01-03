@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OralEye - Sign In</title>
+<style>
+  .body-full-page-container {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 600px; /* Adjusted width for two columns */
+  }
+  .header, .footer {
+    text-align: center;
+    width: 100%;
+  }
+  .columns {
+    display: flex;
+  }
+  .column {
+    width: 50%;
+    padding: 0 10px;
+  }
+  h1 {
+    color: #333;
+  }
+  .button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    margin: 10px 0;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .button-secondary {
+    background-color: #3498db;
+  }
+  .info-text {
+    text-align: center;
+    margin: 15px 0;
+    color: #333;
+  }
+  .link {
+    color: #3498db;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body style="margin: 0;">
+  <div class="body-full-page-container">
+  <div class="container">
+    <div class="header">
+      <h1>OralEye</h1>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <div class="info-text">
+          <p><b>Sign in with OralEye Account</b></p>
+          <p>Sign in to connect OralEye devices and Manage your digital assets</p>
+        </div>
+        <button class="button" id="sign-in-button">Sign in</button>
+      </div>
+      <div class="column">
+        <div class="info-text">
+          <p><b>Don't have a OralEye Account?</b></p>
+          <p>Create a OralEye Account to access OralEye systems</p>
+        </div>
+        <button class="button button-secondary">Create OralEye Account</button>
+      </div>
+    </div>
+    <div class="footer">
+      <a href="#" class="link">Reset password or activate account</a>
+    </div>
+  </div>
+</div>
+<script src="sign_in.js"></script>
+</body>
+</html>

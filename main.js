@@ -1,0 +1,173 @@
+require('dotenv').config();
+const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
+const Store = require('electron-store');
+
+const fs = require('fs');
+const fsPromises = require('fs').promises;
+const path = require('node:path')
+const axios = require('axios');
+const store = new Store();
+
+const { Storage } = require('@google-cloud/storage');
+const gcStorage = new Storage();
+const bucketName = 'session-images';
+
+async function uploadFile(filePath) {
+  const userDataPath = app.getPath('userData');
+  const localPath = path.join(userDataPath, filePath);
+  const remoteFilePath = filePath.replace("captures/", "");
+  await gcStorage.bucket(bucketName).upload(localPath, {
+    gzip: true,
+    destination: remoteFilePath,
+    metadata: {
+      cacheControl: 'public, max-age=31536000',
+    },
+  });
+}
+ipcMain.handle('uploadFile', async (event, arg) => {
+  uploadFile(arg).catch(console.error);
+});
+
+let win = null;
+const createWindow = () => {
+  win = new BrowserWindow({
+    width: 960,
+    height: 600,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: true,
+    webPreferences: {
+      nodeIntegration: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+  // win.setWindowButtonVisibility(false)
+  win.loadFile('sign_in_page.html')
+}
+
+let tray = null;
+app.whenReady().then(() => {
+  // Create a new window
+  createWindow()
+
+  // Create a dock icon
+  if (process.platform === 'darwin') {
+    const iconPath = path.join(__dirname, 'assets', 'dock_logo.png');
+    const dockIcon = nativeImage.createFromPath(iconPath);
+
+    // app.dock.setIcon(dockIcon);
+  }
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+
+async function ensureDirectoryExistence(filePath) {
+  const dirname = path.dirname(filePath);
+  try {
+    await fsPromises.mkdir(dirname, { recursive: true });
+  } catch (err) {
+    // Ignore the error if the folder already exists, otherwise throw it
+    if (err.code !== 'EEXIST') throw err;
+  }
+}
+
+// Expose the saveImage function to the renderer process
+// file path is relative to the app's userData folder
+ipcMain.handle('saveImage', async (event, imageBuffer, filePath) => {
+  const userDataPath = app.getPath('userData');
+  const fullFilePath = path.join(userDataPath, filePath);
+  await ensureDirectoryExistence(fullFilePath);
+  fs.writeFile(fullFilePath, imageBuffer, (err) => {
+    if (err) throw err;
+  });
+  return fullFilePath;
+});
+
+// Create oauth window
+function createAuthWindow() {
+  const authWindow = new BrowserWindow({
+    width: 500,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false
+    }
+  });
+
+  const CLIENT_ID = '1046688975280-pi2hjde3trbc6i856gunj6k7iri8b2g5.apps.googleusercontent.com';
+  const REDIRECT_URI = 'http://127.0.0.1:2023';
+  const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=profile email`;
+  authWindow.loadURL(googleAuthUrl);
+
+  authWindow.webContents.on('will-redirect', async (event, url) => {
+    if (url.startsWith(REDIRECT_URI)) {
+      event.preventDefault();
+      const raw_code = /code=([^&]*)/.exec(url) || null;
+      const code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
+      const decodedCode = decodeURIComponent(code);
+      await axios.post('https://oauth2.googleapis.com/token', {
+        code: decodedCode,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code'
+      }, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(response => {
+        // Handle success
+        const accessToken = response.data.access_token;
+        const refreshToken = response.data.refresh_token;
+
+        axios.get('https://people.googleapis.com/v1/people/me?personFields=names,photos', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }).then(response => {
+          // The response object will contain the user's profile information.
+          const userName = response.data.names[0].displayName;
+          const userPhoto = response.data.photos[0].url;
+
+          // Set in electron store. This will be used in the renderer process.
+          store.set('userName', userName);
+          store.set('userPhoto', userPhoto);
+          win.loadFile('index.html');
+        }).catch(error => {
+          console.error('Error fetching user profile:', error);
+        });
+      }).catch(error => {
+        // Handle error
+        console.error('Error during token request', error.response.data);
+      });
+
+      // Now you can use the accessToken to make API requests on behalf of the user
+      // Don't forget to close the authWindow
+      authWindow.close();
+    }
+  });
+}
+
+// Listen for an IPC message to open the auth window
+ipcMain.on('open-auth-window', (event, arg) => {
+  createAuthWindow();
+});
+
+ipcMain.handle('loadFile', async (event, filePath) => {
+  const userDataPath = app.getPath('userData');
+  const fullFilePath = path.join(userDataPath, filePath);
+  if (fs.existsSync(fullFilePath)) {
+    const fileData = await fsPromises.readFile(fullFilePath);
+    return fileData;
+  } else {
+    return null;
+  }
+});

@@ -1,0 +1,38 @@
+/* Remove padding and border from the modal-content and modal-body */
+.modal-content, .modal-body {
+    padding: 0;
+    border: none;
+  }
+  
+  /* Ensure the video fills the container */
+  #camera {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+  
+  /* Style for the control panel */
+  #controlPanel {
+    padding: 1rem; /* Add some padding around the controls */
+    padding-right: 1.5rem;
+    padding-top: 2rem;
+    display: flex;
+    flex-direction: column; /* Stack controls vertically */
+    justify-content: center; /* Center controls vertically */
+  }
+  
+  /* Style for form elements */
+  .form-group {
+    margin-bottom: 1rem; /* Add some space between controls */
+  }
+  
+  /* Close button style */
+  .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+  }
