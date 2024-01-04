@@ -20,3 +20,5 @@ The files / secret can be found on Google Cloud project, or ask Haomiao for the 
 ```bash
 npm run start
 ```
+
+If `--openssl-legacy-provider` is not allowed in NODE_OPTIONS error is encountered, try unset the NODE_OPTIONS by `unset NODE_OPTIONS` on Mac and `$env:NODE_OPTIONS=""` on Windows powershell.
