@@ -1,9 +1,19 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const Store = require('electron-store');
 
+function getDeviceList() {
+  return new Promise((resolve) => {
+    ipcRenderer.once('device-list-response', (event, deviceList) => {
+        resolve(deviceList);
+    });
+    ipcRenderer.send('get-device-list');
+  });
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   saveImage: (imageBuffer, filePath) => ipcRenderer.invoke('saveImage', imageBuffer, filePath),
   loadFile: (filePath) => ipcRenderer.invoke('loadFile', filePath),
+  getDeviceList: () => getDeviceList(),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {

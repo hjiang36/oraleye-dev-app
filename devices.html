@@ -174,7 +174,7 @@
             <li>
               <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item" href="sign_in_page.html">Sign out</a></li>
+            <li><a class="dropdown-item" href="sign_in_page.html" id="signOutBtn">Sign out</a></li>
           </ul>
         </div>
       </div>
@@ -194,7 +194,7 @@
         </div>
         <hr class="mt-2">
 
-        <div class="row">
+        <div class="row" id="device-list-wrapper">
           <div class="col-xl-6 mb-4">
             <div class="card">
               <div class="card-body">
@@ -244,8 +244,45 @@
 
         </div>
       </div>
+
+      <!-- Modal -->
+      <div id="deviceSetingsModal" class="modal fade" tabindex="-1" aria-labelledby="deviceSetingsModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content" style="background-color: transparent; border-color: transparent;">
+            <div class="modal-body">
+              <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-lg-12 col-xl-11">
+                  <div class="card text-black" style="border-radius: 25px;">
+                    <div class="card-body p-md-6">
+                      <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Settings</p>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="blueLightSettingsToggle">
+                            <label class="form-check-label" for="blueLightSettingsToggle">Blue Light</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="whiteLightSettingsToggle">
+                            <label class="form-check-label" for="whiteLightSettingsToggle">White Light</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Modal -->
   </main>
   <script src="app.js"></script>
+  <script type="module" src="devices.js"></script>
 </body>
 
 </html>

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
 const Store = require('electron-store');
+const bonjour = require('bonjour')();
 
 const fs = require('fs');
 const fsPromises = require('fs').promises;
@@ -57,6 +58,8 @@ app.whenReady().then(() => {
     // app.dock.setIcon(dockIcon);
   }
 
+  discoverCameras();
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
@@ -66,6 +69,29 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+  bonjour.destroy();
+});
+
+let deviceList = [];
+function discoverCameras() {
+  // Browse for all _camera._tcp services
+  const browser = bonjour.find({ type: 'camera', protocol: 'tcp' });
+
+  browser.on('up', service => {
+    if (service.name.startsWith('OralEye')) {
+      deviceList.push(service);
+    }
+  });
+
+  browser.on('down', service => {
+    if (service.name.startsWith('OralEye')) {
+      deviceList.filter(cam => cam.name !== service.name);
+    }
+  });
+}
+
+ipcMain.on('get-device-list', (event) => {
+  event.reply('device-list-response', deviceList);
 });
 
 
