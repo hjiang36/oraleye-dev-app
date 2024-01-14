@@ -1,5 +1,4 @@
 let deviceList = [];
-let whiteLightStatus = 'on';
 let selectedCameraAddress = '';
 
 // Set camera light status
@@ -31,6 +30,33 @@ function setDeviceLightStatus(deviceIp, command, lights) {
         .catch((error) => {
             console.error('Error:', error);
         });
+}
+
+async function getDeviceLightStatus(deviceIp, port, endpoint) {
+    try {
+        const response = await fetch(`http://${deviceIp}:${port}/${endpoint}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const xml = await response.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, "text/xml");
+
+        const lights = xmlDoc.getElementsByTagName("light");
+        const lightStatuses = [];
+
+        for (let i = 0; i < lights.length; i++) {
+            const lightName = lights[i].getElementsByTagName("lightName")[0].textContent;
+            const lightStatus = lights[i].getElementsByTagName("lightStatus")[0].textContent;
+            lightStatuses.push({ lightName, lightStatus });
+        }
+
+        return lightStatuses;
+    } catch (error) {
+        console.error('Error fetching light status:', error);
+        throw error;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -75,7 +101,22 @@ function updateDeviceListUI(cameras) {
             const cameraAddress = this.getAttribute('data-camera-address');
             selectedCameraAddress = cameraAddress;
 
-            // TODO: Get light status from device and set the toggle buttons accordingly
+            // Get light status from device and set the toggle buttons accordingly
+            getDeviceLightStatus(cameraAddress, '8008', 'GetLightStatus')
+                .then(lightStatuses => {
+                    const whiteLightButton = document.getElementById('whiteLightSettingsToggle');
+                    const blueLightButton = document.getElementById('blueLightSettingsToggle');
+
+                    lightStatuses.forEach(light => {
+                        if (light.lightName === 'white') {
+                            whiteLightButton.checked = light.lightStatus === 'on';
+                        } else if (light.lightName === 'blue') {
+                            blueLightButton.checked = light.lightStatus === 'on';
+                        }
+                    });
+                }).catch(error => {
+                    console.error(error);
+                });
         });
     });
 }
