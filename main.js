@@ -2,6 +2,7 @@ require('dotenv').config();
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
+const Stream = require('node-rtsp-stream');
 
 const fs = require('fs');
 const fsPromises = require('fs').promises;
@@ -12,6 +13,31 @@ const store = new Store();
 const { Storage } = require('@google-cloud/storage');
 const gcStorage = new Storage();
 const bucketName = 'session-images';
+
+let stream = null;
+ipcMain.on('start-rtsp-stream', (event, streamUrl) => {
+    if (stream) {
+        // If a stream is already running, stop it before starting a new one
+        stream.stop();
+    }
+
+    stream = new Stream({
+        name: 'streamName',
+        streamUrl: streamUrl,
+        wsPort: 9999,
+        ffmpegOptions: { // options ffmpeg flags
+          '-stats': '', // an option with no neccessary value uses a blank string
+          '-r': 30
+        }
+    });
+});
+
+ipcMain.on('stop-rtsp-stream', () => {
+    if (stream) {
+        stream.stop();
+        stream = null;
+    }
+});
 
 async function uploadFile(filePath) {
   const userDataPath = app.getPath('userData');

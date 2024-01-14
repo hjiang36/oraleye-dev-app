@@ -1,5 +1,7 @@
 let deviceList = [];
 let selectedCameraAddress = '';
+let ws = null;
+let player = null;
 
 // Set camera light status
 function setDeviceLightStatus(deviceIp, command, lights) {
@@ -117,9 +119,31 @@ function updateDeviceListUI(cameras) {
                 }).catch(error => {
                     console.error(error);
                 });
+
+            // Start preview stream
+            window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
+            
+            // Initialize jsmpeg player when WebSocket is open
+            const canvas = document.getElementById('videoPreviewCanvas');
+            player = new JSMpeg.Player('ws://localhost:9999', { canvas: canvas });
         });
     });
 }
+
+document.getElementById('deviceSetingsModal').addEventListener('hide.bs.modal', function () {
+    if (player) {
+        player.destroy(); // Destroy the player
+        player = null;
+    }
+
+    if (ws) {
+        ws.close(); // Close the WebSocket
+        ws = null;
+    }
+
+    // Stop preview stream
+    window.electronAPI.stopRTSPStream();
+});
 
 function createDeviceElement(camera) {
     const div = document.createElement('div');
