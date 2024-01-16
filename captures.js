@@ -5,10 +5,60 @@ const db = getFirestore(app);
 
 var videoModal = document.getElementById('videoModal');
 var confirmModal = document.getElementById('confirmModal');
-var cameraVideo = document.getElementById('camera');
-var stream = null; // This will hold the stream
+var cameraPreview = document.getElementById('cameraPreview');
 let sourceButton = null;
 let sourceImage = null;
+let player = null; // JSMpeg player
+let cameraAddress = null;
+
+// Capture sensor raw data
+// Mode is for controling the light mode:
+//  1 - blue light
+//  2 - white light
+//  6 - all lights simultaneously
+async function captureSensorRaw(deviceIp, mode) {
+  // Constructing the XML data
+  const localAddress = await window.electronAPI.getLocalIPAddress();
+  console.log('localAddress: ', localAddress);
+  let command = 'CaptureSensorRaw';
+  let content = '<Message>\n<videoId>1</videoId>\n<captureRawMode>' + mode + '</captureRawMode>\n</Message>';
+
+  // URL
+  let url = `http://${deviceIp}:8008/${command}`;
+
+  // Sending POST request
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/xml'
+    },
+    body: content
+  }).then(response =>{
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    
+    // Now we can send another request to start capture upload from camera to PC.
+    command = 'SetRawUploadInfo';
+    content = '<Message>\n<serverIp>' + localAddress +'</serverIp>\n<serverPort>9000</serverPort>\n</Message>';
+    url = `http://${deviceIp}:8008/${command}`;
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/xml'
+      },
+      body: content
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Network response for SetRawUploadInfo was not ok');
+      }
+    }).catch((error) => {
+      console.error('Error:', error);
+    });
+  }).catch((error) => {
+    console.error('Error:', error);
+  });
+}
 
 // Update firebase database to add session ID to patient
 async function updateCaptureRecord(patientID, sessionId) {
@@ -110,7 +160,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
 });
 
 // Handle the opening of the modal
-videoModal.addEventListener('show.bs.modal', function (event) {
+videoModal.addEventListener('show.bs.modal', async function (event) {
   const button = document.getElementById('captureBtn');
   button.textContent = 'Capture';
   button.disabled = false;
@@ -131,28 +181,25 @@ videoModal.addEventListener('show.bs.modal', function (event) {
     document.getElementById("retakeCaptureBtn").style.display = "none"; // Hide the cancel capture button
   }
 
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(function (cameraStream) {
-        stream = cameraStream;
-        cameraVideo.srcObject = stream;
-      }).catch(function (error) {
-        console.log("Error accessing the camera", error);
-      });
-  } else {
-    console.log("MediaDevices interface not available");
+  // Show RTSP stream to canvas
+  // TODO: we use the first camera address for now. Should be able to select the camera address from the modal.
+  if (cameraAddress === null) {
+    const deviceList = await window.electronAPI.getDeviceList();
+    cameraAddress = deviceList[0].addresses[0];
   }
+  window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
+  player = new JSMpeg.Player('ws://localhost:9999', { canvas: cameraPreview });
 });
 
 // Handle the closing of the modal
 videoModal.addEventListener('hide.bs.modal', function (event) {
-  if (stream) {
-    let tracks = stream.getTracks();
-    tracks.forEach(function (track) {
-      track.stop(); // Stop each track on the stream
-    });
+  if (player) {
+    player.destroy(); // Destroy the player
+    player = null;
   }
-  cameraVideo.srcObject = null;
+
+  // Stop preview stream
+  window.electronAPI.stopRTSPStream();
   sourceButton = null;
   sourceImage = null;
 });
@@ -184,13 +231,9 @@ function startButtonCountdown(buttonId, duration) {
       document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
       document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
 
-      var canvas = document.createElement('canvas');
-      canvas.width = cameraVideo.videoWidth;
-      canvas.height = cameraVideo.videoHeight;
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
-
-      const imageDataUrl = canvas.toDataURL('image/png'); // 'image/png' is the default format
+      // TODO: intead of grab a frame from preview, we should trigger the actual acquisition logic.
+      captureSensorRaw(cameraAddress, 2);  // 2 - capture for white now.
+      const imageDataUrl = cameraPreview.toDataURL('image/png'); // 'image/png' is the default format
       const imgElement = document.getElementById('framePreview');
       imgElement.src = imageDataUrl;
       imgElement.style.display = "block"; // Show the preview image

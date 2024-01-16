@@ -423,8 +423,8 @@
                                     <div class="row">
                                         <div class="col-md-9" style="padding: 0;">
                                             <div class="video-container" style="position: relative;">
-                                                <video id="camera" width="100%"
-                                                    style="height: auto; padding: 0%; border: none;" autoplay></video>
+                                                <canvas id="cameraPreview" width="100%"
+                                                    style="width: 100%; height: auto; padding: 0%; border: none;"></canvas>
                                                 <img id="framePreview"
                                                     style="display:none; position: absolute; top: 0; left: 0; width: 100%;"
                                                     alt="Frame Preview" />
@@ -478,6 +478,7 @@
         </div>
     </main>
     <script src="app.js"></script>
+    <script type="text/javascript" src="assets/js/jsmpeg.min.js"></script>
     <script type="module" src="captures.js"></script>
 </body>
 

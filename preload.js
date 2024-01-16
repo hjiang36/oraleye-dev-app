@@ -10,10 +10,20 @@ function getDeviceList() {
   });
 }
 
+function getLocalIPAddress() {
+  return new Promise((resolve) => {
+    ipcRenderer.once('local-ip-address-response', (event, address) => {
+        resolve(address);
+    });
+    ipcRenderer.send('get-local-ip-address');
+  });
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   saveImage: (imageBuffer, filePath) => ipcRenderer.invoke('saveImage', imageBuffer, filePath),
   loadFile: (filePath) => ipcRenderer.invoke('loadFile', filePath),
   getDeviceList: () => getDeviceList(),
+  getLocalIPAddress: () => getLocalIPAddress(),
   startRTSPStream: (streamUrl) => ipcRenderer.send('start-rtsp-stream', streamUrl),
   stopRTSPStream: () => ipcRenderer.send('stop-rtsp-stream'),
 });

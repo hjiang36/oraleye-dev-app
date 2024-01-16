@@ -1,9 +1,11 @@
 require('dotenv').config();
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
+const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
 const Stream = require('node-rtsp-stream');
 
+const net = require('net');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('node:path')
@@ -16,28 +18,95 @@ const bucketName = 'session-images';
 
 let stream = null;
 ipcMain.on('start-rtsp-stream', (event, streamUrl) => {
-    if (stream) {
-        // If a stream is already running, stop it before starting a new one
-        stream.stop();
-    }
+  if (stream) {
+    // If a stream is already running, stop it before starting a new one
+    stream.stop();
+  }
 
-    stream = new Stream({
-        name: 'streamName',
-        streamUrl: streamUrl,
-        wsPort: 9999,
-        ffmpegOptions: { // options ffmpeg flags
-          '-stats': '', // an option with no neccessary value uses a blank string
-          '-r': 30
-        }
-    });
+  stream = new Stream({
+    name: 'streamName',
+    streamUrl: streamUrl,
+    wsPort: 9999,
+    ffmpegOptions: { // options ffmpeg flags
+      '-stats': '', // an option with no neccessary value uses a blank string
+      '-r': 30
+    }
+  });
 });
 
 ipcMain.on('stop-rtsp-stream', () => {
-    if (stream) {
-        stream.stop();
-        stream = null;
-    }
+  if (stream) {
+    stream.stop();
+    stream = null;
+  }
 });
+
+
+function startTcpServer() {
+  const server = net.createServer(socket => {
+    let fileStream;
+    let totalReceived = 0;
+    const bufferSize = 1024; // Size of each data chunk to receive (in bytes)
+    let dataLength = null; // Total data length (to be set when header is received)
+    let isHeaderParsed = false;
+
+    const userDataPath = app.getPath('userData');
+    const filePath = path.join(userDataPath, 'rawCaptures', 'capture.bin');
+    ensureDirectoryExistence(filePath);
+
+    socket.on('data', (chunk) => {
+      if (!isHeaderParsed) {
+        if (chunk.length >= 140) { // 4 bytes cmdType, 4 bytes dataLen, 100 bytes fileName, 4 bytes reserved
+          const cmdType = chunk.readUInt32BE(0);
+          dataLength = chunk.readUInt32BE(4);
+          const fileName = chunk.slice(8, 108).toString('utf-8').replace(/\0/g, ''); // Trim null characters
+          if (cmdType != 0) {
+            // This is not a file transfer command or this is not a proper header. Skip it.
+            return;
+          }
+
+          // Prepare file to write data
+          const userDataPath = app.getPath('userData');
+          const filePath = path.join(userDataPath, 'rawCaptures', fileName);
+          console.log('Saving raw file to:', filePath);
+          fileStream = fs.createWriteStream(filePath);
+
+          // Write the remaining part of the chunk after the header
+          fileStream.write(chunk.slice(140));
+
+          totalReceived += chunk.length - 140;
+          isHeaderParsed = true;
+        }
+      } else {
+        // Write data to file
+        fileStream.write(chunk);
+        totalReceived += chunk.length;
+
+        if (totalReceived >= dataLength) {
+          // Finished receiving data
+          fileStream.end();
+          socket.end(); // Close the connection
+        }
+      }
+    });
+
+    socket.on('end', () => {
+      if (fileStream) {
+        fileStream.end();
+      }
+    });
+  });
+
+  server.on('error', (err) => {
+    console.error('Server error:', err);
+  });
+
+  server.listen(9000, () => {
+    console.log('Server listening on port 9000');
+  });
+}
+
+startTcpServer();
 
 async function uploadFile(filePath) {
   const userDataPath = app.getPath('userData');
@@ -120,6 +189,18 @@ ipcMain.on('get-device-list', (event) => {
   event.reply('device-list-response', deviceList);
 });
 
+ipcMain.on('get-local-ip-address', (event) => {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+  for (const name of Object.keys(interfaces)) {
+    for (const interface of interfaces[name]) {
+      if (interface.family === 'IPv4' && !interface.internal) {
+        addresses.push(interface.address);
+      }
+    }
+  }
+  event.reply('local-ip-address-response', addresses[0]);
+});
 
 async function ensureDirectoryExistence(filePath) {
   const dirname = path.dirname(filePath);

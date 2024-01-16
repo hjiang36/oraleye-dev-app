@@ -1,6 +1,5 @@
 let deviceList = [];
 let selectedCameraAddress = '';
-let ws = null;
 let player = null;
 
 // Set camera light status
@@ -22,16 +21,14 @@ function setDeviceLightStatus(deviceIp, command, lights) {
             'Content-Type': 'text/xml'
         },
         body: content
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    }).catch((error) => {
+        console.error('Error:', error);
+    });
 }
 
 async function getDeviceLightStatus(deviceIp, port, endpoint) {
@@ -122,7 +119,7 @@ function updateDeviceListUI(cameras) {
 
             // Start preview stream
             window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
-            
+
             // Initialize jsmpeg player when WebSocket is open
             const canvas = document.getElementById('videoPreviewCanvas');
             player = new JSMpeg.Player('ws://localhost:9999', { canvas: canvas });
@@ -134,11 +131,6 @@ document.getElementById('deviceSetingsModal').addEventListener('hide.bs.modal', 
     if (player) {
         player.destroy(); // Destroy the player
         player = null;
-    }
-
-    if (ws) {
-        ws.close(); // Close the WebSocket
-        ws = null;
     }
 
     // Stop preview stream
