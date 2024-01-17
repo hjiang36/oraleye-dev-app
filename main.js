@@ -56,10 +56,13 @@ function startTcpServer() {
 
     socket.on('data', (chunk) => {
       if (!isHeaderParsed) {
-        if (chunk.length >= 140) { // 4 bytes cmdType, 4 bytes dataLen, 100 bytes fileName, 4 bytes reserved
+        const headerSize = 112; // 4 bytes cmdType, 4 bytes dataLen, 100 bytes fileName, 4 bytes reserved
+        if (chunk.length >= headerSize) {
           const cmdType = chunk.readUInt32BE(0);
           dataLength = chunk.readUInt32BE(4);
           const fileName = chunk.slice(8, 108).toString('utf-8').replace(/\0/g, ''); // Trim null characters
+          console.log('Receiving file:', fileName);
+          console.log('Data length:', dataLength);
           if (cmdType != 0) {
             // This is not a file transfer command or this is not a proper header. Skip it.
             return;
@@ -72,9 +75,9 @@ function startTcpServer() {
           fileStream = fs.createWriteStream(filePath);
 
           // Write the remaining part of the chunk after the header
-          fileStream.write(chunk.slice(140));
+          fileStream.write(chunk.slice(headerSize));
 
-          totalReceived += chunk.length - 140;
+          totalReceived += chunk.length - headerSize;
           isHeaderParsed = true;
         }
       } else {
