@@ -61,8 +61,6 @@ function startTcpServer() {
           const cmdType = chunk.readUInt32BE(0);
           dataLength = chunk.readUInt32BE(4);
           const fileName = chunk.slice(8, 108).toString('utf-8').replace(/\0/g, ''); // Trim null characters
-          console.log('Receiving file:', fileName);
-          console.log('Data length:', dataLength);
           if (cmdType != 0) {
             // This is not a file transfer command or this is not a proper header. Skip it.
             return;
@@ -130,8 +128,8 @@ ipcMain.handle('uploadFile', async (event, arg) => {
 let win = null;
 const createWindow = () => {
   win = new BrowserWindow({
-    width: 960,
-    height: 600,
+    width: 1280,
+    height: 800,
     titleBarStyle: 'hidden',
     titleBarOverlay: true,
     webPreferences: {
