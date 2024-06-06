@@ -8,7 +8,9 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCqtLtFhGNsXbJxnFfYov-CVBLX9TRSbY0",
+  // The old api key and is deactivated.
+  // If we want to use this code, we need to update this piece in a safe way!!!
+  apiKey: "",
   authDomain: "oraleyedev.firebaseapp.com",
   projectId: "oraleyedev",
   storageBucket: "oraleyedev.appspot.com",
