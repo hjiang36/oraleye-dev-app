@@ -4,7 +4,6 @@ const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
 var OralEyeApi = require('oral_eye_api');
-const Stream = require('node-rtsp-stream');
 
 const net = require('net');
 const fs = require('fs');
@@ -16,31 +15,6 @@ const store = new Store();
 const { Storage } = require('@google-cloud/storage');
 const gcStorage = new Storage();
 const bucketName = 'session-images';
-
-let stream = null;
-ipcMain.on('start-rtsp-stream', (event, streamUrl) => {
-  if (stream) {
-    // If a stream is already running, stop it before starting a new one
-    stream.stop();
-  }
-
-  stream = new Stream({
-    name: 'streamName',
-    streamUrl: streamUrl,
-    wsPort: 9999,
-    ffmpegOptions: { // options ffmpeg flags
-      '-stats': '', // an option with no neccessary value uses a blank string
-      '-r': 30
-    }
-  });
-});
-
-ipcMain.on('stop-rtsp-stream', () => {
-  if (stream) {
-    stream.stop();
-    stream = null;
-  }
-});
 
 
 function startTcpServer() {
@@ -342,5 +316,35 @@ ipcMain.on('set-light-status', (event, ip, lightStates) => {
         resolve(data); // Resolve the promise with the data
       }
     });
+  });
+});
+
+// Set streaming status
+ipcMain.on('set-streaming-status', (event, ip, status) => {
+  // Create the API client
+  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var cameraApi = new OralEyeApi.CameraApi(apiClient);
+
+  // Set the streaming status
+  return new Promise((resolve, reject) => {
+    if (status) {
+      cameraApi.cameraPreviewStartPost((error, data, response) => {
+        if (error) {
+          console.error('Error:', error);
+          reject(error); // Reject the promise with the error
+        } else {
+          resolve(data); // Resolve the promise with the data
+        }
+      })
+    } else {
+      cameraApi.cameraPreviewStopPost((error, data, response) => {
+        if (error) {
+          console.error('Error:', error);
+          reject(error); // Reject the promise with the error
+        } else {
+          resolve(data); // Resolve the promise with the data
+        }
+      });
+    }
   });
 });

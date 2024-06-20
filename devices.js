@@ -1,6 +1,5 @@
 let deviceList = [];
 let selectedCameraAddress = '';
-let player = null;
 
 // Set camera light status
 function setDeviceLightStatus(ip) {
@@ -58,27 +57,29 @@ function updateDeviceListUI(cameras) {
             });
 
             // Start preview stream
-            // window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
-
-            // Initialize jsmpeg player when WebSocket is open
-            // const canvas = document.getElementById('videoPreviewCanvas');
-            // player = new JSMpeg.Player('ws://localhost:9999', { canvas: canvas });
+            window.electronAPI.setStreamingStatus(selectedCameraAddress, true);
+        
+            // Wait and show the stream
+            const url = `http://${selectedCameraAddress}:8080/camera/preview/video_feed`;
+            setTimeout(() => {
+                document.getElementById('videoPreview').src = url + '?ts=' + new Date().getTime();
+                document.getElementById('videoPreview').style.display = 'block';
+            }, 200);
         });
     });
 }
 
 document.getElementById('deviceSetingsModal').addEventListener('hide.bs.modal', function () {
-    if (player) {
-        player.destroy(); // Destroy the player
-        player = null;
-    }
-
     // Stop preview stream
-    window.electronAPI.stopRTSPStream();
+    document.getElementById('videoPreview').src = '';
+    document.getElementById('videoPreview').style.display = 'none';
+    window.electronAPI.setStreamingStatus(selectedCameraAddress, false);
 });
 
 function createDeviceElement(camera) {
     // Choose the Ipv4 address if available, otherwise use the first address
+    // TODO: even if we choose a capture from specific device, the capture page will still just use the first device.
+    // TODO: we should pass the selected device address to the capture page.
     const ipAddress = camera.addresses.find(address => address.includes('.')) || camera.addresses[0];
     const div = document.createElement('div');
     div.className = 'col-xl-6 mb-4';
@@ -98,7 +99,7 @@ function createDeviceElement(camera) {
         </div>
         <div class="card-footer border-0 bg-body-tertiary p-2 d-flex justify-content-around">
           <button class="btn btn-link m-0 text-reset camera-settings-button" role="button" data-bs-toggle="modal" data-bs-target="#deviceSetingsModal" data-camera-address="${ipAddress}" data-ripple-color="primary" data-mdb-ripple-init>Settings</button>
-          <button class="btn btn-link m-0 text-reset" href="captures.html" role="button" data-ripple-color="primary" data-mdb-ripple-init>Capture</button>
+          <a class="btn btn-link m-0 text-reset" href="captures.html" role="button" data-ripple-color="primary" data-mdb-ripple-init>Capture</a>
         </div>
       </div>`;
 
