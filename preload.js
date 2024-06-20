@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getLocalIPAddress: () => getLocalIPAddress(),
   startRTSPStream: (streamUrl) => ipcRenderer.send('start-rtsp-stream', streamUrl),
   stopRTSPStream: () => ipcRenderer.send('stop-rtsp-stream'),
+  getLightStatus: (ip) => ipcRenderer.invoke('get-light-status', ip),
+  setLightStatus: (ip, lightStates) => ipcRenderer.send('set-light-status', ip, lightStates),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {

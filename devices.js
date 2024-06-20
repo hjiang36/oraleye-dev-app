@@ -3,59 +3,13 @@ let selectedCameraAddress = '';
 let player = null;
 
 // Set camera light status
-function setDeviceLightStatus(deviceIp, command, lights) {
-    // Constructing the XML data
-    let content = '<Message>\n';
-    lights.forEach(light => {
-        content += `<light>\n<lightName>${light.name}</lightName>\n<lightStatus>${light.status}</lightStatus>\n</light>\n`;
-    });
-    content += '</Message>';
-
-    // URL
-    const url = `http://${deviceIp}:8008/${command}`;
-
-    // Sending POST request
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/xml'
-        },
-        body: content
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();
-    }).catch((error) => {
-        console.error('Error:', error);
-    });
-}
-
-async function getDeviceLightStatus(deviceIp, port, endpoint) {
-    try {
-        const response = await fetch(`http://${deviceIp}:${port}/${endpoint}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const xml = await response.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xml, "text/xml");
-
-        const lights = xmlDoc.getElementsByTagName("light");
-        const lightStatuses = [];
-
-        for (let i = 0; i < lights.length; i++) {
-            const lightName = lights[i].getElementsByTagName("lightName")[0].textContent;
-            const lightStatus = lights[i].getElementsByTagName("lightStatus")[0].textContent;
-            lightStatuses.push({ lightName, lightStatus });
-        }
-
-        return lightStatuses;
-    } catch (error) {
-        console.error('Error fetching light status:', error);
-        throw error;
-    }
+function setDeviceLightStatus(ip) {
+    const lightStatus = {
+        white_led: document.getElementById('whiteLightSettingsToggle').checked ? 'on' : 'off',
+        blue_led: document.getElementById('blueLightSettingsToggle').checked ? 'on' : 'off',
+        red_laser: document.getElementById('redLaserSettingsToggle').checked ? 'on' : 'off',
+    };
+    window.electronAPI.setLightStatus(ip, lightStatus);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -64,23 +18,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 document.getElementById('blueLightSettingsToggle').addEventListener('click', function () {
-    updateDeviceLightStatus();
+    setDeviceLightStatus(selectedCameraAddress);
 });
 
 document.getElementById('whiteLightSettingsToggle').addEventListener('click', function () {
-    updateDeviceLightStatus();
+    setDeviceLightStatus(selectedCameraAddress);
 });
 
-function updateDeviceLightStatus() {
-    const whiteLightButton = document.getElementById('whiteLightSettingsToggle');
-    const blueLightButton = document.getElementById('blueLightSettingsToggle');
-
-    setDeviceLightStatus(selectedCameraAddress, 'SetLightStatus', [
-        { name: 'white', status: whiteLightButton.checked ? 'on' : 'off' },
-        { name: 'blue', status: blueLightButton.checked ? 'on' : 'off' }
-    ]);
-
-}
+document.getElementById('redLaserSettingsToggle').addEventListener('click', function () {
+    setDeviceLightStatus(selectedCameraAddress);
+});
 
 function updateDeviceListUI(cameras) {
     deviceList = cameras;
@@ -99,30 +46,23 @@ function updateDeviceListUI(cameras) {
         button.addEventListener('click', function () {
             const cameraAddress = this.getAttribute('data-camera-address');
             selectedCameraAddress = cameraAddress;
+            console.log('Selected camera address:', selectedCameraAddress);
 
             // Get light status from device and set the toggle buttons accordingly
-            getDeviceLightStatus(cameraAddress, '8008', 'GetLightStatus')
-                .then(lightStatuses => {
-                    const whiteLightButton = document.getElementById('whiteLightSettingsToggle');
-                    const blueLightButton = document.getElementById('blueLightSettingsToggle');
-
-                    lightStatuses.forEach(light => {
-                        if (light.lightName === 'white') {
-                            whiteLightButton.checked = light.lightStatus === 'on';
-                        } else if (light.lightName === 'blue') {
-                            blueLightButton.checked = light.lightStatus === 'on';
-                        }
-                    });
-                }).catch(error => {
-                    console.error(error);
-                });
+            window.electronAPI.getLightStatus(selectedCameraAddress).then(lightStatus => {
+                document.getElementById('whiteLightSettingsToggle').checked = lightStatus.white_led === 'on';
+                document.getElementById('blueLightSettingsToggle').checked = lightStatus.blue_led === 'on';
+                document.getElementById('redLaserSettingsToggle').checked = lightStatus.red_laser === 'on';
+            }).catch(error => {
+                console.error(error);
+            });
 
             // Start preview stream
-            window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
+            // window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
 
             // Initialize jsmpeg player when WebSocket is open
-            const canvas = document.getElementById('videoPreviewCanvas');
-            player = new JSMpeg.Player('ws://localhost:9999', { canvas: canvas });
+            // const canvas = document.getElementById('videoPreviewCanvas');
+            // player = new JSMpeg.Player('ws://localhost:9999', { canvas: canvas });
         });
     });
 }
@@ -138,6 +78,8 @@ document.getElementById('deviceSetingsModal').addEventListener('hide.bs.modal', 
 });
 
 function createDeviceElement(camera) {
+    // Choose the Ipv4 address if available, otherwise use the first address
+    const ipAddress = camera.addresses.find(address => address.includes('.')) || camera.addresses[0];
     const div = document.createElement('div');
     div.className = 'col-xl-6 mb-4';
     div.innerHTML = `
@@ -148,14 +90,14 @@ function createDeviceElement(camera) {
               <img src="assets/device_icon.webp" alt="" style="width: 45px; height: 45px" class="rounded-circle" />
               <div class="ms-3">
                 <p class="fw-bold mb-1">${camera.name}</p>
-                <p class="text-muted mb-0">Address: ${camera.addresses[0] || 'N/A'}</p>
+                <p class="text-muted mb-0">Address: ${ipAddress || 'N/A'}</p>
               </div>
             </div>
             <span class="badge rounded-pill alert-success">Connected</span>
           </div>
         </div>
         <div class="card-footer border-0 bg-body-tertiary p-2 d-flex justify-content-around">
-          <button class="btn btn-link m-0 text-reset camera-settings-button" role="button" data-bs-toggle="modal" data-bs-target="#deviceSetingsModal" data-camera-address="${camera.addresses[0]}" data-ripple-color="primary" data-mdb-ripple-init>Settings</button>
+          <button class="btn btn-link m-0 text-reset camera-settings-button" role="button" data-bs-toggle="modal" data-bs-target="#deviceSetingsModal" data-camera-address="${ipAddress}" data-ripple-color="primary" data-mdb-ripple-init>Settings</button>
           <button class="btn btn-link m-0 text-reset" href="captures.html" role="button" data-ripple-color="primary" data-mdb-ripple-init>Capture</button>
         </div>
       </div>`;
