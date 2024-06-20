@@ -24,10 +24,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadFile: (filePath) => ipcRenderer.invoke('loadFile', filePath),
   getDeviceList: () => getDeviceList(),
   getLocalIPAddress: () => getLocalIPAddress(),
-  startRTSPStream: (streamUrl) => ipcRenderer.send('start-rtsp-stream', streamUrl),
-  stopRTSPStream: () => ipcRenderer.send('stop-rtsp-stream'),
   getLightStatus: (ip) => ipcRenderer.invoke('get-light-status', ip),
   setLightStatus: (ip, lightStates) => ipcRenderer.send('set-light-status', ip, lightStates),
+  setStreamingStatus: (ip, status) => ipcRenderer.send('set-streaming-status', ip, status),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {

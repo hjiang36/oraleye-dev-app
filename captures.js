@@ -1,14 +1,15 @@
-import app from './firebase.js';
-import { getFirestore, updateDoc, doc, arrayUnion, setDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+// TODO: Firebase API token is not set up proplery. Disable firebase related code for now.
 
-const db = getFirestore(app);
+// import app from './firebase.js';
+// import { getFirestore, updateDoc, doc, arrayUnion, setDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+// const db = getFirestore(app);
 
 var videoModal = document.getElementById('videoModal');
 var confirmModal = document.getElementById('confirmModal');
 var cameraPreview = document.getElementById('cameraPreview');
 let sourceButton = null;
 let sourceImage = null;
-let player = null; // JSMpeg player
 let cameraAddress = null;
 
 // Capture sensor raw data
@@ -181,27 +182,28 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById("retakeCaptureBtn").style.display = "none"; // Hide the cancel capture button
   }
 
-  // Show RTSP stream to canvas
   // TODO: we use the first camera address for now. Should be able to select the camera address from the modal.
   if (cameraAddress === null) {
     const deviceList = await window.electronAPI.getDeviceList();
-    cameraAddress = deviceList[0].addresses[0];
+    cameraAddress = deviceList[0].addresses.find(address => address.includes('.')) || deviceList[0].addresses[0];
   }
-  window.electronAPI.startRTSPStream(`rtsp://${cameraAddress}/live1`);
-  player = new JSMpeg.Player('ws://localhost:9999', { canvas: cameraPreview });
+  // Start preview
+  console.log('Selected camera address:', cameraAddress);
+  console.log('Starting preview stream...');
+  window.electronAPI.setStreamingStatus(cameraAddress, true);
+        
+  // Wait and show the stream
+  const url = `http://${cameraAddress}:8080/camera/preview/video_feed`;
+  setTimeout(() => {
+      cameraPreview.src = url + '?ts=' + new Date().getTime();
+      cameraPreview.style.display = 'block';
+  }, 200);
 });
 
 // Handle the closing of the modal
 videoModal.addEventListener('hide.bs.modal', function (event) {
-  if (player) {
-    player.destroy(); // Destroy the player
-    player = null;
-  }
-
-  // Stop preview stream
-  window.electronAPI.stopRTSPStream();
-  sourceButton = null;
-  sourceImage = null;
+  cameraPreview.src = '';
+  window.electronAPI.setStreamingStatus(cameraAddress, false);
 });
 
 function updateButtonCountdown(button, remaining) {
