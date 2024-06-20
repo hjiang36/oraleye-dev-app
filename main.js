@@ -171,7 +171,7 @@ app.on('window-all-closed', () => {
 let deviceList = [];
 function discoverCameras() {
   // Browse for all _camera._tcp services
-  const browser = bonjour.find({ type: 'camera', protocol: 'tcp' });
+  const browser = bonjour.find({ type: 'http' });
 
   browser.on('up', service => {
     if (service.name.startsWith('OralEye')) {
