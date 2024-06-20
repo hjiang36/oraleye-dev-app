@@ -1,6 +1,10 @@
-import { app, auth } from './firebase.js';
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+// As we disabled the API key from firebase, we can't use the firebase API in the renderer process.
+// We may update the API key in the future, so we keep the code here for reference.
+// For now, please use the admin backdoor to login.
+//
+// import { app, auth } from './firebase.js';
+// import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+// import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 document.getElementById('sign-in-button').addEventListener('click', () => {
   window.api.send('open-auth-window', '');
@@ -14,6 +18,13 @@ document.getElementById('email-sign-in-button').addEventListener('click', () => 
     alert('Please enter an email and password');
     return;
   }
+  // Add a backdoor for testing
+  if (email == 'admin' && password == 'admin') {
+    window.electronStore.set('userName', 'Guest User');
+    window.electronStore.set('userPhoto', 'https://avatars.githubusercontent.com/scienstanford');
+    window.location.href = 'index.html';
+  };
+
   signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
     const user = userCredential.user;
     const userId = user.uid;

@@ -22,6 +22,7 @@
     "node-rtsp-stream": "^0.0.9"
   },
   "dependencies": {
+    "api": "^6.1.1",
     "bonjour": "^3.5.0"
   }
 }

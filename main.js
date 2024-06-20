@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
 const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
+var OralEyeApi = require('oral_eye_api');
 const Stream = require('node-rtsp-stream');
 
 const net = require('net');
@@ -304,4 +305,42 @@ ipcMain.handle('loadFile', async (event, filePath) => {
   } else {
     return null;
   }
+});
+
+// Get light status
+ipcMain.handle('get-light-status', async (event, ip) => {
+  // Create the API client
+  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var lightsApi = new OralEyeApi.LightsApi(apiClient);
+
+  // Get the device current light information
+  return new Promise((resolve, reject) => {
+    lightsApi.lightsStatusGet((error, data, response) => {
+      if (error) {
+        console.error('Error:', error);
+        reject(error); // Reject the promise with the error
+      } else {
+        resolve(data); // Resolve the promise with the data
+      }
+    });
+  });
+});
+
+// Set light status
+ipcMain.on('set-light-status', (event, ip, lightStates) => {
+  // Create the API client
+  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var lightsApi = new OralEyeApi.LightsApi(apiClient);
+
+  // Set the light status
+  return new Promise((resolve, reject) => {
+    lightsApi.lightsControlPost(lightStates, (error, data, response) => {
+      if (error) {
+        console.error('Error:', error);
+        reject(error); // Reject the promise with the error
+      } else {
+        resolve(data); // Resolve the promise with the data
+      }
+    });
+  });
 });
