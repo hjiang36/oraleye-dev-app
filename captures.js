@@ -12,55 +12,6 @@ let sourceButton = null;
 let sourceImage = null;
 let cameraAddress = null;
 
-// Capture sensor raw data
-// Mode is for controling the light mode:
-//  1 - blue light
-//  2 - white light
-//  6 - all lights simultaneously
-async function captureSensorRaw(deviceIp, mode) {
-  // Constructing the XML data
-  const localAddress = await window.electronAPI.getLocalIPAddress();
-  console.log('localAddress: ', localAddress);
-  let command = 'CaptureSensorRaw';
-  let content = '<Message>\n<videoId>1</videoId>\n<captureRawMode>' + mode + '</captureRawMode>\n</Message>';
-
-  // URL
-  let url = `http://${deviceIp}:8008/${command}`;
-
-  // Sending POST request
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/xml'
-    },
-    body: content
-  }).then(response =>{
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    // Now we can send another request to start capture upload from camera to PC.
-    command = 'SetRawUploadInfo';
-    content = '<Message>\n<serverIp>' + localAddress +'</serverIp>\n<serverPort>9000</serverPort>\n</Message>';
-    url = `http://${deviceIp}:8008/${command}`;
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/xml'
-      },
-      body: content
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error('Network response for SetRawUploadInfo was not ok');
-      }
-    }).catch((error) => {
-      console.error('Error:', error);
-    });
-  }).catch((error) => {
-    console.error('Error:', error);
-  });
-}
-
 // Update firebase database to add session ID to patient
 async function updateCaptureRecord(patientID, sessionId) {
   const patientDocRef = doc(db, "patients", patientID);
@@ -227,18 +178,18 @@ function startButtonCountdown(buttonId, duration) {
 
     if (remaining <= 0) {
       clearInterval(intervalId);
-      button.textContent = 'Capture';
-      button.disabled = false; // Re-enable the button
-      button.style.display = "none"; // Hide the capture button
-      document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
-      document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
+      button.textContent = 'Capturing...';
+      window.electronAPI.captureRawImage(cameraAddress).then((imagePath) => {
+        button.textContent = 'Capturing';
+        button.disabled = false; // Re-enable the button
+        button.style.display = "none"; // Hide the capture button
+        document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
+        document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
 
-      // TODO: intead of grab a frame from preview, we should trigger the actual acquisition logic.
-      captureSensorRaw(cameraAddress, 2);  // 2 - capture for white now.
-      const imageDataUrl = cameraPreview.toDataURL('image/png'); // 'image/png' is the default format
-      const imgElement = document.getElementById('framePreview');
-      imgElement.src = imageDataUrl;
-      imgElement.style.display = "block"; // Show the preview image
+        const imgElement = document.getElementById('framePreview');
+        imgElement.src = imagePath;
+        imgElement.style.display = "block"; // Show the preview image
+      });
     }
   }, 1000);
 }

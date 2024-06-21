@@ -20,9 +20,8 @@
     "fabric": "^5.3.0",
     "firebase": "^10.7.0"
   },
-    "dependencies": {
-        "api": "^6.1.1",
-        "bonjour": "^3.5.0",
-        "oral_eye_api": "file:api"
-    }
+  "dependencies": {
+    "bonjour": "^3.5.0",
+    "oral_eye_api": "file:api"
+  }
 }
