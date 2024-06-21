@@ -89,7 +89,7 @@ export default class CameraApi {
     /**
      * Capture raw image
      * @param {module:api/CameraApi~cameraCapturePostCallback} callback The callback function, accepting three arguments: error, data, response
-     * data is of type: {@link File}
+     * data is of type: {@link Buffer}
      */
     cameraCapturePost(callback) {
       let postBody = null;
@@ -106,7 +106,7 @@ export default class CameraApi {
       let authNames = [];
       let contentTypes = [];
       let accepts = ['application/octet-stream'];
-      let returnType = File;
+      let returnType = Buffer;
       return this.apiClient.callApi(
         '/camera/capture', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,

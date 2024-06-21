@@ -16,74 +16,6 @@ const { Storage } = require('@google-cloud/storage');
 const gcStorage = new Storage();
 const bucketName = 'session-images';
 
-
-function startTcpServer() {
-  const server = net.createServer(socket => {
-    let fileStream;
-    let totalReceived = 0;
-    const bufferSize = 1024; // Size of each data chunk to receive (in bytes)
-    let dataLength = null; // Total data length (to be set when header is received)
-    let isHeaderParsed = false;
-
-    const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'rawCaptures', 'capture.bin');
-    ensureDirectoryExistence(filePath);
-
-    socket.on('data', (chunk) => {
-      if (!isHeaderParsed) {
-        const headerSize = 112; // 4 bytes cmdType, 4 bytes dataLen, 100 bytes fileName, 4 bytes reserved
-        if (chunk.length >= headerSize) {
-          const cmdType = chunk.readUInt32BE(0);
-          dataLength = chunk.readUInt32BE(4);
-          const fileName = chunk.slice(8, 108).toString('utf-8').replace(/\0/g, ''); // Trim null characters
-          if (cmdType != 0) {
-            // This is not a file transfer command or this is not a proper header. Skip it.
-            return;
-          }
-
-          // Prepare file to write data
-          const userDataPath = app.getPath('userData');
-          const filePath = path.join(userDataPath, 'rawCaptures', fileName);
-          console.log('Saving raw file to:', filePath);
-          fileStream = fs.createWriteStream(filePath);
-
-          // Write the remaining part of the chunk after the header
-          fileStream.write(chunk.slice(headerSize));
-
-          totalReceived += chunk.length - headerSize;
-          isHeaderParsed = true;
-        }
-      } else {
-        // Write data to file
-        fileStream.write(chunk);
-        totalReceived += chunk.length;
-
-        if (totalReceived >= dataLength) {
-          // Finished receiving data
-          fileStream.end();
-          socket.end(); // Close the connection
-        }
-      }
-    });
-
-    socket.on('end', () => {
-      if (fileStream) {
-        fileStream.end();
-      }
-    });
-  });
-
-  server.on('error', (err) => {
-    console.error('Server error:', err);
-  });
-
-  server.listen(9000, () => {
-    console.log('Server listening on port 9000');
-  });
-}
-
-startTcpServer();
-
 async function uploadFile(filePath) {
   const userDataPath = app.getPath('userData');
   const localPath = path.join(userDataPath, filePath);
@@ -347,4 +279,57 @@ ipcMain.on('set-streaming-status', (event, ip, status) => {
       });
     }
   });
+});
+
+// Capture raw image
+ipcMain.handle('capture-raw-image', async (event, ip) => {
+  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var cameraApi = new OralEyeApi.CameraApi(apiClient);
+
+  try {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+      cameraApi.cameraCapturePost((error, data, response) => {
+        if (error) {
+          return reject(error);
+        }
+
+        // Get the filename
+        const contentDisposition = response.headers['content-disposition'];
+        const filename = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : 'unknown.jpg';
+        const outputPath = path.join(app.getPath('downloads'), filename);
+
+        // Ensure response is a readable stream
+        if (!response || typeof response.on !== 'function') {
+          return reject(new Error('Invalid response stream from API call'));
+        }
+
+        // Attach listeners immediately
+        response.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        response.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          fs.writeFile(outputPath, buffer, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              // Generate thumbnail
+              resolve(outputPath);
+            }
+          });
+
+          response.on('error', (error) => {
+            console.error('Stream error:', error);
+            reject(error);
+          });
+        });
+      });
+    });
+  } catch (error) {
+    throw new Error(`Failed to download file: ${error.message}`);
+  }
 });
