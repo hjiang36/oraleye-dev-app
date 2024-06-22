@@ -29,3 +29,15 @@ npm run start
 ```
 
 If `--openssl-legacy-provider` is not allowed in NODE_OPTIONS error is encountered, try unset the NODE_OPTIONS by `unset NODE_OPTIONS` on Mac and `$env:NODE_OPTIONS=""` on Windows powershell.
+
+
+### Format & Lint
+Proper format and lint check is required before merging the code.
+To format code, run
+```bash
+npm run format
+```
+To check code format without auto-fixing, run
+```bash
+npm run lint
+```
