@@ -413,21 +413,27 @@
                     aria-hidden="true">
                     <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90%;">
                         <div class="modal-content">
-                            <div class="modal-body" style="padding: 0%;">
+                            <div class="modal-body" id="videoModalBody" style="padding: 0%;">
                                 <!-- The video content -->
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                                     style="position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;">
                                 </button>
 
                                 <div class="container-fluid" style="padding: 0;">
-                                    <div class="row">
+                                    <div class="row g-0">
                                         <div class="col-md-9" style="padding: 0;">
                                             <div class="video-container" style="position: relative;">
                                                 <img id="cameraPreview" width="100%"
                                                     style="width: 100%; height: auto; padding: 0%; border: none;"></img>
-                                                <img id="framePreview"
-                                                    style="display:none; position: absolute; top: 0; left: 0; width: 100%;"
-                                                    alt="Frame Preview" />
+                                                
+                                                <div id="framePreviewContainer" style="position: absolute; top: 0; left: 0; width: 100%; overflow: hidden; aspect-ratio: 1.78;">
+                                                    <img id="framePreview" style="display:none; width: 100%;" alt="Frame Preview" />
+                                                </div>
+                                                <div class="gallery-dots-container" id="galleryDots">
+                                                    <span class="gallery-dot" onclick="showPreviewImage(0)"></span>
+                                                    <span class="gallery-dot" onclick="showPreviewImage(1)"></span>
+                                                    <span class="gallery-dot" onclick="showPreviewImage(2)"></span>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Control Panel Container -->

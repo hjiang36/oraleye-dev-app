@@ -1,38 +1,68 @@
 /* Remove padding and border from the modal-content and modal-body */
-.modal-content, .modal-body {
-    padding: 0;
-    border: none;
-  }
-  
-  /* Ensure the video fills the container */
-  #camera {
-    width: 100%;
-    height: auto;
-    display: block;
-    margin: 0;
-    padding: 0;
-    border: none;
-  }
-  
-  /* Style for the control panel */
-  #controlPanel {
-    padding: 1rem; /* Add some padding around the controls */
-    padding-right: 1.5rem;
-    padding-top: 2rem;
-    display: flex;
-    flex-direction: column; /* Stack controls vertically */
-    justify-content: center; /* Center controls vertically */
-  }
-  
-  /* Style for form elements */
-  .form-group {
-    margin-bottom: 1rem; /* Add some space between controls */
-  }
-  
-  /* Close button style */
-  .btn-close {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 2;
-  }
+.modal-content,
+.modal-body {
+  padding: 0;
+  border: none;
+}
+
+/* Ensure the video fills the container */
+#camera {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* Style for the control panel */
+#controlPanel {
+  padding: 1rem;
+  /* Add some padding around the controls */
+  padding-right: 1.5rem;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  /* Stack controls vertically */
+  justify-content: center;
+  /* Center controls vertically */
+}
+
+/* Style for form elements */
+.form-group {
+  margin-bottom: 1rem;
+  /* Add some space between controls */
+}
+
+/* Close button style */
+.btn-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+}
+
+/* Gallery navigation dots */
+.gallery-dots-container {
+  text-align: center;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+  z-index: 3;
+}
+
+.gallery-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 3px;
+  background-color: #bbbbbb;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.gallery-dot.active {
+  background-color: #4540d3;
+}

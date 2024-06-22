@@ -8,6 +8,7 @@
 var videoModal = document.getElementById('videoModal');
 var confirmModal = document.getElementById('confirmModal');
 var cameraPreview = document.getElementById('cameraPreview');
+var galleyPreviewIndex = 0;
 let sourceButton = null;
 let sourceImage = null;
 let cameraAddress = null;
@@ -121,6 +122,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     // Set the preview image to the captured image
     document.getElementById('framePreview').src = sourceImage.src;
     document.getElementById('framePreview').style.display = "block"; // Show the preview image
+    document.getElementById("galleryDots").style.display = "block"; // Show the gallery dots
     document.getElementById("captureBtn").style.display = "none"; // Hide the capture button
     document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
@@ -128,6 +130,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     // Clear the preview image
     document.getElementById('framePreview').src = "";
     document.getElementById('framePreview').style.display = "none"; // Hide the preview image
+    document.getElementById('galleryDots').style.display = "none"; // Hide the gallery dots
     document.getElementById("captureBtn").style.display = "block"; // Show the capture button
     document.getElementById("confirmCaptureBtn").style.display = "none"; // Hide the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "none"; // Hide the cancel capture button
@@ -180,6 +183,7 @@ function startButtonCountdown(buttonId, duration) {
       clearInterval(intervalId);
       button.textContent = 'Capturing...';
       window.electronAPI.captureRawImage(cameraAddress).then((imagePath) => {
+        const imagePath = '/Users/haomiaojiang/Downloads/762f657e-db07-4bb4-bc13-45ef47fbcef3.jpg'
         button.textContent = 'Capturing';
         button.disabled = false; // Re-enable the button
         button.style.display = "none"; // Hide the capture button
@@ -189,6 +193,8 @@ function startButtonCountdown(buttonId, duration) {
         const imgElement = document.getElementById('framePreview');
         imgElement.src = imagePath;
         imgElement.style.display = "block"; // Show the preview image
+        imgElement.style.visibility = "hidden"; // Hide the preview image
+        document.getElementById("galleryDots").style.display = "block"; // Show the gallery dots
       });
     }
   }, 1000);
@@ -247,3 +253,34 @@ document.getElementById('retakeCaptureBtn').addEventListener('click', function (
   document.getElementById('framePreview').src = ""; // Clear the preview image
   document.getElementById('framePreview').style.display = "none"; // Hide the preview image
 });
+
+function showPreviewImage(index) {
+  const imageHeight = document.getElementById('framePreview').height / 3;
+  galleyPreviewIndex = index;
+  const dots = document.querySelectorAll('.gallery-dot');
+
+  const offset = -imageHeight * index;
+  framePreview.style.transform = `translateY(${offset}px)`;
+  dots.forEach(dot => dot.classList.remove('active'));
+  dots[index].classList.add('active');
+}
+
+window.showPreviewImage = showPreviewImage; // expose to html
+
+function setGalleryHeight() {
+  // Calculate the height of one section of the image
+  const imageHeight = document.getElementById('framePreview').height / 3;
+  console.log('Image height:', imageHeight);
+  document.getElementById('framePreviewContainer').style.height = `${imageHeight}px`;
+  document.getElementById('videoModalBody').style.minHeight = `${imageHeight}px`;
+}
+
+document.getElementById('framePreview').onload = function() {
+  setGalleryHeight();
+  showPreviewImage(0);
+  this.style.visibility = "visible"; // Show the preview image
+}
+
+window.onresize = function() {
+  setGalleryHeight();
+}
