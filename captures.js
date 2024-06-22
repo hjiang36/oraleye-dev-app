@@ -194,6 +194,9 @@ function startButtonCountdown(buttonId, duration) {
         imgElement.style.display = "block"; // Show the preview image
         imgElement.style.visibility = "hidden"; // Hide the preview image
         document.getElementById("galleryDots").style.display = "block"; // Show the gallery dots
+
+        // Hide the camera preview
+        cameraPreview.style.display = 'none';
       });
     }
   }, 1000);
@@ -251,6 +254,8 @@ document.getElementById('retakeCaptureBtn').addEventListener('click', function (
   document.getElementById("captureBtn").style.display = "block"; // Show the capture button
   document.getElementById('framePreview').src = ""; // Clear the preview image
   document.getElementById('framePreview').style.display = "none"; // Hide the preview image
+  cameraPreview.style.display = 'block'; // Show the camera preview
+  document.getElementById("galleryDots").style.display = "none"; // Hide the gallery dots
 });
 
 function showPreviewImage(index) {
