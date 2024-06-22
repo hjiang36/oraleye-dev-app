@@ -1,5 +1,11 @@
 import app from './firebase.js';
-import { getFirestore, collection, addDoc, getDocs, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  Timestamp,
+} from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 const db = getFirestore(app);
 let patients = [];
@@ -21,8 +27,8 @@ document.getElementById('userSearch').addEventListener('input', function (e) {
 });
 
 async function fetchPatients() {
-  const querySnapshot = await getDocs(collection(db, "patients"));
-  querySnapshot.forEach((doc) => {
+  const querySnapshot = await getDocs(collection(db, 'patients'));
+  querySnapshot.forEach(doc => {
     patients.push([doc.id, doc.data()]);
   });
   return patients;
@@ -47,7 +53,7 @@ function addCollapsibleFunction(li) {
       details.classList.add('collapse');
     }
   });
-};
+}
 
 function addPatientToList(user) {
   const userList = document.getElementById('userList');
@@ -97,7 +103,13 @@ function addPatientToList(user) {
 
     // Navigate to the captures page
     event.stopPropagation();
-    window.location.href = 'captures.html?patientID=' + patientID + '&patientName=' + user.Name + '&patientDOB=' + formatDate(new Date(user.DOB.seconds * 1000));
+    window.location.href =
+      'captures.html?patientID=' +
+      patientID +
+      '&patientName=' +
+      user.Name +
+      '&patientDOB=' +
+      formatDate(new Date(user.DOB.seconds * 1000));
   });
 
   // Add the number of captures to the patient list item
@@ -121,48 +133,47 @@ fetchPatients().then(patients => {
   populateTable(patients);
 });
 
-
 document.querySelectorAll('#userList .list-group-item').forEach(item => {
   addCollapsibleFunction(item);
 });
 
-
 var addPatientModal = document.getElementById('addPatientModal');
-addPatientModal.addEventListener('show.bs.modal', function (event) {
-});
+addPatientModal.addEventListener('show.bs.modal', function (event) {});
 
-addPatientModal.addEventListener('hide.bs.modal', function (event) {
-});
+addPatientModal.addEventListener('hide.bs.modal', function (event) {});
 
-document.getElementById("submitNewPatient").addEventListener('click', async function(e) {
-  // Collect form data
-  const dobString = document.getElementById("patientDOB").value; // e.g., "1990-01-01"
-  const dobDate = new Date(dobString);
-  const dobTimestamp = Timestamp.fromDate(dobDate);
-  var userData = {
-    Name: document.getElementById("patientName").value,
-    DOB: dobTimestamp,
-    Email: document.getElementById("patientEmail").value,
-    Phone: document.getElementById("patientPhone").value
-  };
+document
+  .getElementById('submitNewPatient')
+  .addEventListener('click', async function (e) {
+    // Collect form data
+    const dobString = document.getElementById('patientDOB').value; // e.g., "1990-01-01"
+    const dobDate = new Date(dobString);
+    const dobTimestamp = Timestamp.fromDate(dobDate);
+    var userData = {
+      Name: document.getElementById('patientName').value,
+      DOB: dobTimestamp,
+      Email: document.getElementById('patientEmail').value,
+      Phone: document.getElementById('patientPhone').value,
+    };
 
-  try {
-    // Add a new document with the collected data in collection
-    const docRef = await addDoc(collection(db, "patients"), userData);
-    console.log("Document written with ID: ", docRef.id);
-    
-    // Close the modal after submitting
-    let patientModal = bootstrap.Modal.getInstance(addPatientModal);
-    patientModal.hide();
+    try {
+      // Add a new document with the collected data in collection
+      const docRef = await addDoc(collection(db, 'patients'), userData);
+      console.log('Document written with ID: ', docRef.id);
 
-    // Add the new patient to the list
-    patients.push([docRef.id, userData])
-    addPatientToList(userData);
+      // Close the modal after submitting
+      let patientModal = bootstrap.Modal.getInstance(addPatientModal);
+      patientModal.hide();
 
-    // Optionally, clear the form fields or provide feedback to the user
-  } catch (e) {
-    console.error("Error adding document: ", e);
-    document.getElementById("addPatientResult").textContent = "Failed to add patient. Please try again.";
-    document.getElementById("addPatientResult").display = "block";
-  }
-});
+      // Add the new patient to the list
+      patients.push([docRef.id, userData]);
+      addPatientToList(userData);
+
+      // Optionally, clear the form fields or provide feedback to the user
+    } catch (e) {
+      console.error('Error adding document: ', e);
+      document.getElementById('addPatientResult').textContent =
+        'Failed to add patient. Please try again.';
+      document.getElementById('addPatientResult').display = 'block';
+    }
+  });

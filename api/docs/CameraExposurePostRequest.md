@@ -2,8 +2,6 @@
 
 ## Properties
 
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**exposureTime** | **Number** | Exposure time in microseconds | [optional] 
-
-
+| Name             | Type       | Description                   | Notes      |
+| ---------------- | ---------- | ----------------------------- | ---------- |
+| **exposureTime** | **Number** | Exposure time in microseconds | [optional] |

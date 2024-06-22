@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -10,13 +10,13 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase
 const firebaseConfig = {
   // The old api key and is deactivated.
   // If we want to use this code, we need to update this piece in a safe way!!!
-  apiKey: "",
-  authDomain: "oraleyedev.firebaseapp.com",
-  projectId: "oraleyedev",
-  storageBucket: "oraleyedev.appspot.com",
-  messagingSenderId: "1046688975280",
-  appId: "1:1046688975280:web:fd56a80bdefaac509eee75",
-  measurementId: "G-8M7FFBG3BV"
+  apiKey: '',
+  authDomain: 'oraleyedev.firebaseapp.com',
+  projectId: 'oraleyedev',
+  storageBucket: 'oraleyedev.appspot.com',
+  messagingSenderId: '1046688975280',
+  appId: '1:1046688975280:web:fd56a80bdefaac509eee75',
+  measurementId: 'G-8M7FFBG3BV',
 };
 
 // Initialize Firebase
@@ -26,4 +26,4 @@ const analytics = getAnalytics(app);
 // Get a reference to the Firebase Auth object
 const auth = getAuth(app);
 
-export {app, auth};
+export { app, auth };

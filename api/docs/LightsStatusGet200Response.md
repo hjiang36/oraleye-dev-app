@@ -2,43 +2,26 @@
 
 ## Properties
 
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**whiteLed** | **String** |  | [optional] 
-**blueLed** | **String** |  | [optional] 
-**redLaser** | **String** |  | [optional] 
-
-
+| Name         | Type       | Description | Notes      |
+| ------------ | ---------- | ----------- | ---------- |
+| **whiteLed** | **String** |             | [optional] |
+| **blueLed**  | **String** |             | [optional] |
+| **redLaser** | **String** |             | [optional] |
 
 ## Enum: WhiteLedEnum
 
+- `on` (value: `"on"`)
 
-* `on` (value: `"on"`)
-
-* `off` (value: `"off"`)
-
-
-
-
+- `off` (value: `"off"`)
 
 ## Enum: BlueLedEnum
 
+- `on` (value: `"on"`)
 
-* `on` (value: `"on"`)
-
-* `off` (value: `"off"`)
-
-
-
-
+- `off` (value: `"off"`)
 
 ## Enum: RedLaserEnum
 
+- `on` (value: `"on"`)
 
-* `on` (value: `"on"`)
-
-* `off` (value: `"off"`)
-
-
-
-
+- `off` (value: `"off"`)

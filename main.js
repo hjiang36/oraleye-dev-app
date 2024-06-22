@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { app, BrowserWindow, ipcMain, nativeImage } = require('electron')
+const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
@@ -8,7 +8,7 @@ var OralEyeApi = require('oral_eye_api');
 const net = require('net');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
-const path = require('node:path')
+const path = require('node:path');
 const axios = require('axios');
 const store = new Store();
 
@@ -19,7 +19,7 @@ const bucketName = 'session-images';
 async function uploadFile(filePath) {
   const userDataPath = app.getPath('userData');
   const localPath = path.join(userDataPath, filePath);
-  const remoteFilePath = filePath.replace("captures/", "");
+  const remoteFilePath = filePath.replace('captures/', '');
   await gcStorage.bucket(bucketName).upload(localPath, {
     gzip: true,
     destination: remoteFilePath,
@@ -41,17 +41,17 @@ const createWindow = () => {
     titleBarOverlay: true,
     webPreferences: {
       nodeIntegration: true,
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
   // win.setWindowButtonVisibility(false)
-  win.loadFile('sign_in_page.html')
-}
+  win.loadFile('sign_in_page.html');
+};
 
 let tray = null;
 app.whenReady().then(() => {
   // Create a new window
-  createWindow()
+  createWindow();
 
   // Create a dock icon
   if (process.platform === 'darwin') {
@@ -64,9 +64,9 @@ app.whenReady().then(() => {
   discoverCameras();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -93,17 +93,17 @@ function discoverCameras() {
   });
 }
 
-ipcMain.on('get-device-list', (event) => {
+ipcMain.on('get-device-list', event => {
   event.reply('device-list-response', deviceList);
 });
 
-ipcMain.on('get-local-ip-address', (event) => {
+ipcMain.on('get-local-ip-address', event => {
   const interfaces = os.networkInterfaces();
   const addresses = [];
   for (const name of Object.keys(interfaces)) {
-    for (const interface of interfaces[name]) {
-      if (interface.family === 'IPv4' && !interface.internal) {
-        addresses.push(interface.address);
+    for (const this_interface of interfaces[name]) {
+      if (this_interface.family === 'IPv4' && !this_interface.internal) {
+        addresses.push(this_interface.address);
       }
     }
   }
@@ -126,7 +126,7 @@ ipcMain.handle('saveImage', async (event, imageBuffer, filePath) => {
   const userDataPath = app.getPath('userData');
   const fullFilePath = path.join(userDataPath, filePath);
   await ensureDirectoryExistence(fullFilePath);
-  fs.writeFile(fullFilePath, imageBuffer, (err) => {
+  fs.writeFile(fullFilePath, imageBuffer, err => {
     if (err) throw err;
   });
   return fullFilePath;
@@ -138,11 +138,12 @@ function createAuthWindow() {
     width: 500,
     height: 600,
     webPreferences: {
-      nodeIntegration: false
-    }
+      nodeIntegration: false,
+    },
   });
 
-  const CLIENT_ID = '1046688975280-pi2hjde3trbc6i856gunj6k7iri8b2g5.apps.googleusercontent.com';
+  const CLIENT_ID =
+    '1046688975280-pi2hjde3trbc6i856gunj6k7iri8b2g5.apps.googleusercontent.com';
   const REDIRECT_URI = 'http://127.0.0.1:2023';
   const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=profile email`;
@@ -152,43 +153,56 @@ function createAuthWindow() {
     if (url.startsWith(REDIRECT_URI)) {
       event.preventDefault();
       const raw_code = /code=([^&]*)/.exec(url) || null;
-      const code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
+      const code = raw_code && raw_code.length > 1 ? raw_code[1] : null;
       const decodedCode = decodeURIComponent(code);
-      await axios.post('https://oauth2.googleapis.com/token', {
-        code: decodedCode,
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        redirect_uri: REDIRECT_URI,
-        grant_type: 'authorization_code'
-      }, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(response => {
-        // Handle success
-        const accessToken = response.data.access_token;
-        const refreshToken = response.data.refresh_token;
-
-        axios.get('https://people.googleapis.com/v1/people/me?personFields=names,photos', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
+      await axios
+        .post(
+          'https://oauth2.googleapis.com/token',
+          {
+            code: decodedCode,
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            redirect_uri: REDIRECT_URI,
+            grant_type: 'authorization_code',
+          },
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
           }
-        }).then(response => {
-          // The response object will contain the user's profile information.
-          const userName = response.data.names[0].displayName;
-          const userPhoto = response.data.photos[0].url;
+        )
+        .then(response => {
+          // Handle success
+          const accessToken = response.data.access_token;
+          const refreshToken = response.data.refresh_token;
 
-          // Set in electron store. This will be used in the renderer process.
-          store.set('userName', userName);
-          store.set('userPhoto', userPhoto);
-          win.loadFile('index.html');
-        }).catch(error => {
-          console.error('Error fetching user profile:', error);
+          axios
+            .get(
+              'https://people.googleapis.com/v1/people/me?personFields=names,photos',
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            )
+            .then(response => {
+              // The response object will contain the user's profile information.
+              const userName = response.data.names[0].displayName;
+              const userPhoto = response.data.photos[0].url;
+
+              // Set in electron store. This will be used in the renderer process.
+              store.set('userName', userName);
+              store.set('userPhoto', userPhoto);
+              win.loadFile('index.html');
+            })
+            .catch(error => {
+              console.error('Error fetching user profile:', error);
+            });
+        })
+        .catch(error => {
+          // Handle error
+          console.error('Error during token request', error.response.data);
         });
-      }).catch(error => {
-        // Handle error
-        console.error('Error during token request', error.response.data);
-      });
 
       // Now you can use the accessToken to make API requests on behalf of the user
       // Don't forget to close the authWindow
@@ -216,7 +230,9 @@ ipcMain.handle('loadFile', async (event, filePath) => {
 // Get light status
 ipcMain.handle('get-light-status', async (event, ip) => {
   // Create the API client
-  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
   var lightsApi = new OralEyeApi.LightsApi(apiClient);
 
   // Get the device current light information
@@ -235,7 +251,9 @@ ipcMain.handle('get-light-status', async (event, ip) => {
 // Set light status
 ipcMain.on('set-light-status', (event, ip, lightStates) => {
   // Create the API client
-  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
   var lightsApi = new OralEyeApi.LightsApi(apiClient);
 
   // Set the light status
@@ -254,7 +272,9 @@ ipcMain.on('set-light-status', (event, ip, lightStates) => {
 // Set streaming status
 ipcMain.on('set-streaming-status', (event, ip, status) => {
   // Create the API client
-  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
   var cameraApi = new OralEyeApi.CameraApi(apiClient);
 
   // Set the streaming status
@@ -267,7 +287,7 @@ ipcMain.on('set-streaming-status', (event, ip, status) => {
         } else {
           resolve(data); // Resolve the promise with the data
         }
-      })
+      });
     } else {
       cameraApi.cameraPreviewStopPost((error, data, response) => {
         if (error) {
@@ -283,7 +303,9 @@ ipcMain.on('set-streaming-status', (event, ip, status) => {
 
 // Capture raw image
 ipcMain.handle('capture-raw-image', async (event, ip) => {
-  var apiClient = new OralEyeApi.ApiClient(basePath = "http://" + ip + ":8080");
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
   var cameraApi = new OralEyeApi.CameraApi(apiClient);
 
   try {
@@ -307,13 +329,13 @@ ipcMain.handle('capture-raw-image', async (event, ip) => {
         }
 
         // Attach listeners immediately
-        response.on('data', (chunk) => {
+        response.on('data', chunk => {
           chunks.push(chunk);
         });
 
         response.on('end', () => {
           const buffer = Buffer.concat(chunks);
-          fs.writeFile(outputPath, buffer, (err) => {
+          fs.writeFile(outputPath, buffer, err => {
             if (err) {
               reject(err);
             } else {
@@ -322,7 +344,7 @@ ipcMain.handle('capture-raw-image', async (event, ip) => {
             }
           });
 
-          response.on('error', (error) => {
+          response.on('error', error => {
             console.error('Stream error:', error);
             reject(error);
           });
