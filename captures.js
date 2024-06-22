@@ -8,6 +8,7 @@
 var videoModal = document.getElementById('videoModal');
 var confirmModal = document.getElementById('confirmModal');
 var cameraPreview = document.getElementById('cameraPreview');
+var cameraPreviewContainer = document.getElementById('cameraPreviewContainer');
 var galleyPreviewIndex = 0;
 let sourceButton = null;
 let sourceImage = null;
@@ -130,7 +131,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById("captureBtn").style.display = "none"; // Hide the capture button
     document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
-    cameraPreview.style.display = 'none'; // Hide the camera preview
+    cameraPreviewContainer.style.display = 'none'; // Hide the camera preview
     
   } else {
     // Clear the preview image
@@ -140,12 +141,17 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById("captureBtn").style.display = "block"; // Show the capture button
     document.getElementById("confirmCaptureBtn").style.display = "none"; // Hide the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "none"; // Hide the cancel capture button
-    cameraPreview.style.display = 'block'; // Show the camera preview
+    cameraPreviewContainer.style.display = 'block'; // Show the camera preview
   }
 
   // TODO: we use the first camera address for now. Should be able to select the camera address from the modal.
   if (cameraAddress === null) {
     const deviceList = await window.electronAPI.getDeviceList();
+    if (deviceList.length === 0) {
+      // Set the preview to a debug image
+      cameraPreview.src = 'assets/capture_sample_1.png';
+      return
+    }
     cameraAddress = deviceList[0].addresses.find(address => address.includes('.')) || deviceList[0].addresses[0];
   }
   // Start preview stream
@@ -200,7 +206,7 @@ function startButtonCountdown(buttonId, duration) {
         document.getElementById("galleryDots").style.display = "block"; // Show the gallery dots
 
         // Hide the camera preview
-        cameraPreview.style.display = 'none';
+        cameraPreviewContainer.style.display = 'none';
       });
     }
   }, 1000);
@@ -241,7 +247,7 @@ document.getElementById('retakeCaptureBtn').addEventListener('click', function (
   document.getElementById("captureBtn").style.display = "block"; // Show the capture button
   document.getElementById('framePreview').src = ""; // Clear the preview image
   document.getElementById('framePreview').style.display = "none"; // Hide the preview image
-  cameraPreview.style.display = 'block'; // Show the camera preview
+  cameraPreviewContainer.style.display = 'block'; // Show the camera preview
   document.getElementById("galleryDots").style.display = "none"; // Hide the gallery dots
 });
 
