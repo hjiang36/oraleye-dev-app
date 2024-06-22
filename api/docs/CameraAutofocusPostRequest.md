@@ -2,19 +2,12 @@
 
 ## Properties
 
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**autofocus** | **String** |  | [optional] 
-
-
+| Name          | Type       | Description | Notes      |
+| ------------- | ---------- | ----------- | ---------- |
+| **autofocus** | **String** |             | [optional] |
 
 ## Enum: AutofocusEnum
 
+- `on` (value: `"on"`)
 
-* `on` (value: `"on"`)
-
-* `off` (value: `"off"`)
-
-
-
-
+- `off` (value: `"off"`)

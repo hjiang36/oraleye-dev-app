@@ -1,14 +1,12 @@
 # OralEyeApi.LightsApi
 
-All URIs are relative to *http://localhost*
+All URIs are relative to _http://localhost_
 
-Method | HTTP request | Description
-------------- | ------------- | -------------
-[**lightsBlueMaxTimePost**](LightsApi.md#lightsBlueMaxTimePost) | **POST** /lights/blue/max_time | Set blue light maximum on time for health safety
-[**lightsControlPost**](LightsApi.md#lightsControlPost) | **POST** /lights/control | Set lights on/off
-[**lightsStatusGet**](LightsApi.md#lightsStatusGet) | **GET** /lights/status | Get status of the lights
-
-
+| Method                                                          | HTTP request                   | Description                                      |
+| --------------------------------------------------------------- | ------------------------------ | ------------------------------------------------ |
+| [**lightsBlueMaxTimePost**](LightsApi.md#lightsBlueMaxTimePost) | **POST** /lights/blue/max_time | Set blue light maximum on time for health safety |
+| [**lightsControlPost**](LightsApi.md#lightsControlPost)         | **POST** /lights/control       | Set lights on/off                                |
+| [**lightsStatusGet**](LightsApi.md#lightsStatusGet)             | **GET** /lights/status         | Get status of the lights                         |
 
 ## lightsBlueMaxTimePost
 
@@ -22,22 +20,25 @@ Set blue light maximum on time for health safety
 import OralEyeApi from 'oral_eye_api';
 
 let apiInstance = new OralEyeApi.LightsApi();
-let lightsBlueMaxTimePostRequest = new OralEyeApi.LightsBlueMaxTimePostRequest(); // LightsBlueMaxTimePostRequest | 
-apiInstance.lightsBlueMaxTimePost(lightsBlueMaxTimePostRequest, (error, data, response) => {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully. Returned data: ' + data);
+let lightsBlueMaxTimePostRequest =
+  new OralEyeApi.LightsBlueMaxTimePostRequest(); // LightsBlueMaxTimePostRequest |
+apiInstance.lightsBlueMaxTimePost(
+  lightsBlueMaxTimePostRequest,
+  (error, data, response) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('API called successfully. Returned data: ' + data);
+    }
   }
-});
+);
 ```
 
 ### Parameters
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **lightsBlueMaxTimePostRequest** | [**LightsBlueMaxTimePostRequest**](LightsBlueMaxTimePostRequest.md)|  | 
+| Name                             | Type                                                                | Description | Notes |
+| -------------------------------- | ------------------------------------------------------------------- | ----------- | ----- |
+| **lightsBlueMaxTimePostRequest** | [**LightsBlueMaxTimePostRequest**](LightsBlueMaxTimePostRequest.md) |             |
 
 ### Return type
 
@@ -51,7 +52,6 @@ No authorization required
 
 - **Content-Type**: application/json
 - **Accept**: application/json
-
 
 ## lightsControlPost
 
@@ -65,22 +65,24 @@ Set lights on/off
 import OralEyeApi from 'oral_eye_api';
 
 let apiInstance = new OralEyeApi.LightsApi();
-let lightsStatusGet200Response = new OralEyeApi.LightsStatusGet200Response(); // LightsStatusGet200Response | 
-apiInstance.lightsControlPost(lightsStatusGet200Response, (error, data, response) => {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully. Returned data: ' + data);
+let lightsStatusGet200Response = new OralEyeApi.LightsStatusGet200Response(); // LightsStatusGet200Response |
+apiInstance.lightsControlPost(
+  lightsStatusGet200Response,
+  (error, data, response) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('API called successfully. Returned data: ' + data);
+    }
   }
-});
+);
 ```
 
 ### Parameters
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **lightsStatusGet200Response** | [**LightsStatusGet200Response**](LightsStatusGet200Response.md)|  | 
+| Name                           | Type                                                            | Description | Notes |
+| ------------------------------ | --------------------------------------------------------------- | ----------- | ----- |
+| **lightsStatusGet200Response** | [**LightsStatusGet200Response**](LightsStatusGet200Response.md) |             |
 
 ### Return type
 
@@ -94,7 +96,6 @@ No authorization required
 
 - **Content-Type**: application/json
 - **Accept**: application/json
-
 
 ## lightsStatusGet
 
@@ -133,4 +134,3 @@ No authorization required
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
-

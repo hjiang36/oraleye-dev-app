@@ -68,13 +68,13 @@ then install it via:
 
 The library also works in the browser environment via npm and [browserify](http://browserify.org/). After following
 the above steps with Node.js and installing browserify with `npm install -g browserify`,
-perform the following (assuming *main.js* is your entry file):
+perform the following (assuming _main.js_ is your entry file):
 
 ```shell
 browserify main.js > bundle.js
 ```
 
-Then include *bundle.js* in the HTML pages.
+Then include _bundle.js_ in the HTML pages.
 
 ### Webpack Configuration
 
@@ -87,10 +87,10 @@ module: {
   rules: [
     {
       parser: {
-        amd: false
-      }
-    }
-  ]
+        amd: false,
+      },
+    },
+  ];
 }
 ```
 
@@ -101,10 +101,9 @@ Please follow the [installation](#installation) instruction and execute the foll
 ```javascript
 var OralEyeApi = require('oral_eye_api');
 
-
-var api = new OralEyeApi.CameraApi()
-var cameraAutofocusPostRequest = new OralEyeApi.CameraAutofocusPostRequest(); // {CameraAutofocusPostRequest} 
-var callback = function(error, data, response) {
+var api = new OralEyeApi.CameraApi();
+var cameraAutofocusPostRequest = new OralEyeApi.CameraAutofocusPostRequest(); // {CameraAutofocusPostRequest}
+var callback = function (error, data, response) {
   if (error) {
     console.error(error);
   } else {
@@ -112,38 +111,34 @@ var callback = function(error, data, response) {
   }
 };
 api.cameraAutofocusPost(cameraAutofocusPostRequest, callback);
-
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost*
+All URIs are relative to _http://localhost_
 
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
-*OralEyeApi.CameraApi* | [**cameraAutofocusPost**](docs/CameraApi.md#cameraAutofocusPost) | **POST** /camera/autofocus | Set auto-focus on/off
-*OralEyeApi.CameraApi* | [**cameraCapturePost**](docs/CameraApi.md#cameraCapturePost) | **POST** /camera/capture | Capture raw image
-*OralEyeApi.CameraApi* | [**cameraExposurePost**](docs/CameraApi.md#cameraExposurePost) | **POST** /camera/exposure | Set exposure time
-*OralEyeApi.CameraApi* | [**cameraManualFocusPost**](docs/CameraApi.md#cameraManualFocusPost) | **POST** /camera/manual_focus | Set manual focus distance
-*OralEyeApi.CameraApi* | [**cameraPreviewStartPost**](docs/CameraApi.md#cameraPreviewStartPost) | **POST** /camera/preview/start | Start camera preview
-*OralEyeApi.CameraApi* | [**cameraPreviewStopPost**](docs/CameraApi.md#cameraPreviewStopPost) | **POST** /camera/preview/stop | Stop camera preview
-*OralEyeApi.CameraApi* | [**cameraPreviewVideoFeedGet**](docs/CameraApi.md#cameraPreviewVideoFeedGet) | **GET** /camera/preview/video_feed | Get MJPEG video feed
-*OralEyeApi.LightsApi* | [**lightsBlueMaxTimePost**](docs/LightsApi.md#lightsBlueMaxTimePost) | **POST** /lights/blue/max_time | Set blue light maximum on time for health safety
-*OralEyeApi.LightsApi* | [**lightsControlPost**](docs/LightsApi.md#lightsControlPost) | **POST** /lights/control | Set lights on/off
-*OralEyeApi.LightsApi* | [**lightsStatusGet**](docs/LightsApi.md#lightsStatusGet) | **GET** /lights/status | Get status of the lights
-
+| Class                  | Method                                                                       | HTTP request                       | Description                                      |
+| ---------------------- | ---------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------ |
+| _OralEyeApi.CameraApi_ | [**cameraAutofocusPost**](docs/CameraApi.md#cameraAutofocusPost)             | **POST** /camera/autofocus         | Set auto-focus on/off                            |
+| _OralEyeApi.CameraApi_ | [**cameraCapturePost**](docs/CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image                                |
+| _OralEyeApi.CameraApi_ | [**cameraExposurePost**](docs/CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time                                |
+| _OralEyeApi.CameraApi_ | [**cameraManualFocusPost**](docs/CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance                        |
+| _OralEyeApi.CameraApi_ | [**cameraPreviewStartPost**](docs/CameraApi.md#cameraPreviewStartPost)       | **POST** /camera/preview/start     | Start camera preview                             |
+| _OralEyeApi.CameraApi_ | [**cameraPreviewStopPost**](docs/CameraApi.md#cameraPreviewStopPost)         | **POST** /camera/preview/stop      | Stop camera preview                              |
+| _OralEyeApi.CameraApi_ | [**cameraPreviewVideoFeedGet**](docs/CameraApi.md#cameraPreviewVideoFeedGet) | **GET** /camera/preview/video_feed | Get MJPEG video feed                             |
+| _OralEyeApi.LightsApi_ | [**lightsBlueMaxTimePost**](docs/LightsApi.md#lightsBlueMaxTimePost)         | **POST** /lights/blue/max_time     | Set blue light maximum on time for health safety |
+| _OralEyeApi.LightsApi_ | [**lightsControlPost**](docs/LightsApi.md#lightsControlPost)                 | **POST** /lights/control           | Set lights on/off                                |
+| _OralEyeApi.LightsApi_ | [**lightsStatusGet**](docs/LightsApi.md#lightsStatusGet)                     | **GET** /lights/status             | Get status of the lights                         |
 
 ## Documentation for Models
 
- - [OralEyeApi.CameraAutofocusPostRequest](docs/CameraAutofocusPostRequest.md)
- - [OralEyeApi.CameraExposurePostRequest](docs/CameraExposurePostRequest.md)
- - [OralEyeApi.CameraManualFocusPostRequest](docs/CameraManualFocusPostRequest.md)
- - [OralEyeApi.LightsBlueMaxTimePostRequest](docs/LightsBlueMaxTimePostRequest.md)
- - [OralEyeApi.LightsControlPost200Response](docs/LightsControlPost200Response.md)
- - [OralEyeApi.LightsStatusGet200Response](docs/LightsStatusGet200Response.md)
-
+- [OralEyeApi.CameraAutofocusPostRequest](docs/CameraAutofocusPostRequest.md)
+- [OralEyeApi.CameraExposurePostRequest](docs/CameraExposurePostRequest.md)
+- [OralEyeApi.CameraManualFocusPostRequest](docs/CameraManualFocusPostRequest.md)
+- [OralEyeApi.LightsBlueMaxTimePostRequest](docs/LightsBlueMaxTimePostRequest.md)
+- [OralEyeApi.LightsControlPost200Response](docs/LightsControlPost200Response.md)
+- [OralEyeApi.LightsStatusGet200Response](docs/LightsStatusGet200Response.md)
 
 ## Documentation for Authorization
 
 Endpoints do not require authorization.
-
