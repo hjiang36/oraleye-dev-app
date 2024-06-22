@@ -66,3 +66,13 @@
 .gallery-dot.active {
   background-color: #4540d3;
 }
+
+.captured-image {
+  width: 100%;
+  object-fit: cover; /* Scale the image to fill the element */
+  object-position: top; /* Align the image to the top */
+}
+
+.captured-image:hover {
+  object-position: bottom; /* Align the image to the bottom */
+}

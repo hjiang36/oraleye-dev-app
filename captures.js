@@ -11,6 +11,7 @@ var cameraPreview = document.getElementById('cameraPreview');
 var galleyPreviewIndex = 0;
 let sourceButton = null;
 let sourceImage = null;
+let previewFrameDisplayHeight = null;
 let cameraAddress = null;
 
 // Update firebase database to add session ID to patient
@@ -118,6 +119,9 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
   button.textContent = 'Capture';
   button.disabled = false;
 
+  const src = event.relatedTarget;
+  sourceImage = src.querySelector('.card-img-top');
+
   if (sourceImage && sourceImage.classList.contains('captured-image')) {
     // Set the preview image to the captured image
     document.getElementById('framePreview').src = sourceImage.src;
@@ -126,6 +130,8 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById("captureBtn").style.display = "none"; // Hide the capture button
     document.getElementById("confirmCaptureBtn").style.display = "block"; // Show the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "block"; // Show the cancel capture button
+    cameraPreview.style.display = 'none'; // Hide the camera preview
+    
   } else {
     // Clear the preview image
     document.getElementById('framePreview').src = "";
@@ -134,6 +140,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById("captureBtn").style.display = "block"; // Show the capture button
     document.getElementById("confirmCaptureBtn").style.display = "none"; // Hide the confirm capture button
     document.getElementById("retakeCaptureBtn").style.display = "none"; // Hide the cancel capture button
+    cameraPreview.style.display = 'block'; // Show the camera preview
   }
 
   // TODO: we use the first camera address for now. Should be able to select the camera address from the modal.
@@ -141,16 +148,13 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     const deviceList = await window.electronAPI.getDeviceList();
     cameraAddress = deviceList[0].addresses.find(address => address.includes('.')) || deviceList[0].addresses[0];
   }
-  // Start preview
-  console.log('Selected camera address:', cameraAddress);
-  console.log('Starting preview stream...');
+  // Start preview stream
   window.electronAPI.setStreamingStatus(cameraAddress, true);
         
   // Wait and show the stream
   const url = `http://${cameraAddress}:8080/camera/preview/video_feed`;
   setTimeout(() => {
       cameraPreview.src = url + '?ts=' + new Date().getTime();
-      cameraPreview.style.display = 'block';
   }, 200);
 });
 
@@ -215,20 +219,6 @@ document.getElementById('captureBtn').addEventListener('click', function () {
   }
 });
 
-function dataURLtoBlob(dataUrl) {
-  const arr = dataUrl.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-
-  return new Blob([u8arr], { type: mime });
-}
-
 document.getElementById('confirmCaptureBtn').addEventListener('click', function () {
 
   const dataUrl = document.getElementById('framePreview').src;
@@ -236,16 +226,13 @@ document.getElementById('confirmCaptureBtn').addEventListener('click', function 
     sourceImage.src = dataUrl;
     sourceImage.classList.add('captured-image');
   }
-  const altText = sourceImage.alt;
-  const filePath = `captures/${sessionId}/${altText}.png`;
-  const blob = dataURLtoBlob(dataUrl);
-  blob.arrayBuffer().then(arrayBuffer => {
-    const myBuffer = window.nodeAPI.createBuffer(arrayBuffer);
-    window.electronAPI.saveImage(myBuffer, filePath).then((fullFilePath) => {
-      let videoModal = bootstrap.Modal.getInstance(document.getElementById('videoModal'));
-      videoModal.hide();
-    });
-  });
+
+  sourceImage.style.visibility = "hidden"; // Hide the preview image
+  sourceImage.onload = function () {
+    const imageHeight = sourceImage.height / 3;
+    sourceImage.style.height = `${imageHeight}px`;
+    sourceImage.style.visibility = "visible"; // Show the preview image
+  }
 });
 
 document.getElementById('retakeCaptureBtn').addEventListener('click', function () {
@@ -273,8 +260,10 @@ window.showPreviewImage = showPreviewImage; // expose to html
 
 function setGalleryHeight() {
   // Calculate the height of one section of the image
-  const imageHeight = document.getElementById('framePreview').height / 3;
-  console.log('Image height:', imageHeight);
+  if (!previewFrameDisplayHeight) {
+    previewFrameDisplayHeight = document.getElementById('framePreview').clientHeight / 3;
+  }
+  const imageHeight = previewFrameDisplayHeight;
   document.getElementById('framePreviewContainer').style.height = `${imageHeight}px`;
   document.getElementById('videoModalBody').style.minHeight = `${imageHeight}px`;
 }
@@ -286,5 +275,6 @@ document.getElementById('framePreview').onload = function() {
 }
 
 window.onresize = function() {
+  previewFrameDisplayHeight = null;
   setGalleryHeight();
 }
