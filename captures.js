@@ -183,7 +183,6 @@ function startButtonCountdown(buttonId, duration) {
       clearInterval(intervalId);
       button.textContent = 'Capturing...';
       window.electronAPI.captureRawImage(cameraAddress).then((imagePath) => {
-        const imagePath = '/Users/haomiaojiang/Downloads/762f657e-db07-4bb4-bc13-45ef47fbcef3.jpg'
         button.textContent = 'Capturing';
         button.disabled = false; // Re-enable the button
         button.style.display = "none"; // Hide the capture button
