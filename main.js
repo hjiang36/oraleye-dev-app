@@ -299,7 +299,7 @@ ipcMain.handle('capture-raw-image', async (event, ip) => {
         const filename = contentDisposition
           ? contentDisposition.split('filename=')[1].replace(/"/g, '')
           : 'unknown.jpg';
-        const outputPath = path.join(app.getPath('downloads'), filename);
+        const outputPath = path.join(app.getPath('userData'), filename);
 
         // Ensure response is a readable stream
         if (!response || typeof response.on !== 'function') {
