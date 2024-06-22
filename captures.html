@@ -423,8 +423,13 @@
                                     <div class="row g-0">
                                         <div class="col-md-9" style="padding: 0;">
                                             <div class="video-container" style="position: relative;">
-                                                <img id="cameraPreview" width="100%"
-                                                    style="width: 100%; height: auto; padding: 0%; border: none;"></img>
+                                                <div id="cameraPreviewContainer">
+                                                    <img id="cameraPreview" width="100%"
+                                                        style="width: 100%; height: auto; padding: 0%; border: none;"></img>
+                                                    <div class="cameraPreviewOverlay">
+                                                        <i class="bi bi-crosshair"></i>
+                                                    </div>
+                                                </div>
                                                 
                                                 <div id="framePreviewContainer" style="position: absolute; top: 0; left: 0; width: 100%; overflow: hidden; aspect-ratio: 1.78;">
                                                     <img id="framePreview" style="display:none; width: 100%;" alt="Frame Preview" />
