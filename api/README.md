@@ -123,6 +123,7 @@ All URIs are relative to _http://localhost_
 | _OralEyeApi.CameraApi_ | [**cameraCapturePost**](docs/CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image                                |
 | _OralEyeApi.CameraApi_ | [**cameraExposurePost**](docs/CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time                                |
 | _OralEyeApi.CameraApi_ | [**cameraManualFocusPost**](docs/CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance                        |
+| _OralEyeApi.CameraApi_ | [**cameraMetadataGet**](docs/CameraApi.md#cameraMetadataGet)                 | **GET** /camera/metadata           | Retrieve metadata of a capture                   |
 | _OralEyeApi.CameraApi_ | [**cameraPreviewStartPost**](docs/CameraApi.md#cameraPreviewStartPost)       | **POST** /camera/preview/start     | Start camera preview                             |
 | _OralEyeApi.CameraApi_ | [**cameraPreviewStopPost**](docs/CameraApi.md#cameraPreviewStopPost)         | **POST** /camera/preview/stop      | Stop camera preview                              |
 | _OralEyeApi.CameraApi_ | [**cameraPreviewVideoFeedGet**](docs/CameraApi.md#cameraPreviewVideoFeedGet) | **GET** /camera/preview/video_feed | Get MJPEG video feed                             |
@@ -135,6 +136,7 @@ All URIs are relative to _http://localhost_
 - [OralEyeApi.CameraAutofocusPostRequest](docs/CameraAutofocusPostRequest.md)
 - [OralEyeApi.CameraExposurePostRequest](docs/CameraExposurePostRequest.md)
 - [OralEyeApi.CameraManualFocusPostRequest](docs/CameraManualFocusPostRequest.md)
+- [OralEyeApi.CameraMetadataGet200Response](docs/CameraMetadataGet200Response.md)
 - [OralEyeApi.LightsBlueMaxTimePostRequest](docs/LightsBlueMaxTimePostRequest.md)
 - [OralEyeApi.LightsControlPost200Response](docs/LightsControlPost200Response.md)
 - [OralEyeApi.LightsStatusGet200Response](docs/LightsStatusGet200Response.md)

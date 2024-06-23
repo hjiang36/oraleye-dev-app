@@ -6,6 +6,7 @@ docs/CameraApi.md
 docs/CameraAutofocusPostRequest.md
 docs/CameraExposurePostRequest.md
 docs/CameraManualFocusPostRequest.md
+docs/CameraMetadataGet200Response.md
 docs/LightsApi.md
 docs/LightsBlueMaxTimePostRequest.md
 docs/LightsControlPost200Response.md
@@ -20,6 +21,8 @@ src/index.js
 src/model/CameraAutofocusPostRequest.js
 src/model/CameraExposurePostRequest.js
 src/model/CameraManualFocusPostRequest.js
+src/model/CameraMetadataGet200Response.js
 src/model/LightsBlueMaxTimePostRequest.js
 src/model/LightsControlPost200Response.js
 src/model/LightsStatusGet200Response.js
+test/model/CameraMetadataGet200Response.spec.js
