@@ -2,15 +2,16 @@
 
 All URIs are relative to _http://localhost_
 
-| Method                                                                  | HTTP request                       | Description               |
-| ----------------------------------------------------------------------- | ---------------------------------- | ------------------------- |
-| [**cameraAutofocusPost**](CameraApi.md#cameraAutofocusPost)             | **POST** /camera/autofocus         | Set auto-focus on/off     |
-| [**cameraCapturePost**](CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image         |
-| [**cameraExposurePost**](CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time         |
-| [**cameraManualFocusPost**](CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance |
-| [**cameraPreviewStartPost**](CameraApi.md#cameraPreviewStartPost)       | **POST** /camera/preview/start     | Start camera preview      |
-| [**cameraPreviewStopPost**](CameraApi.md#cameraPreviewStopPost)         | **POST** /camera/preview/stop      | Stop camera preview       |
-| [**cameraPreviewVideoFeedGet**](CameraApi.md#cameraPreviewVideoFeedGet) | **GET** /camera/preview/video_feed | Get MJPEG video feed      |
+| Method                                                                  | HTTP request                       | Description                    |
+| ----------------------------------------------------------------------- | ---------------------------------- | ------------------------------ |
+| [**cameraAutofocusPost**](CameraApi.md#cameraAutofocusPost)             | **POST** /camera/autofocus         | Set auto-focus on/off          |
+| [**cameraCapturePost**](CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image              |
+| [**cameraExposurePost**](CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time              |
+| [**cameraManualFocusPost**](CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance      |
+| [**cameraMetadataGet**](CameraApi.md#cameraMetadataGet)                 | **GET** /camera/metadata           | Retrieve metadata of a capture |
+| [**cameraPreviewStartPost**](CameraApi.md#cameraPreviewStartPost)       | **POST** /camera/preview/start     | Start camera preview           |
+| [**cameraPreviewStopPost**](CameraApi.md#cameraPreviewStopPost)         | **POST** /camera/preview/stop      | Stop camera preview            |
+| [**cameraPreviewVideoFeedGet**](CameraApi.md#cameraPreviewVideoFeedGet) | **GET** /camera/preview/video_feed | Get MJPEG video feed           |
 
 ## cameraAutofocusPost
 
@@ -181,6 +182,49 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+## cameraMetadataGet
+
+> CameraMetadataGet200Response cameraMetadataGet(jobId, light)
+
+Retrieve metadata of a capture
+
+### Example
+
+```javascript
+import OralEyeApi from 'oral_eye_api';
+
+let apiInstance = new OralEyeApi.CameraApi();
+let jobId = 'jobId_example'; // String |
+let light = 'light_example'; // String |
+apiInstance.cameraMetadataGet(jobId, light, (error, data, response) => {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+});
+```
+
+### Parameters
+
+| Name      | Type       | Description | Notes |
+| --------- | ---------- | ----------- | ----- |
+| **jobId** | **String** |             |
+| **light** | **String** |             |
+
+### Return type
+
+[**CameraMetadataGet200Response**](CameraMetadataGet200Response.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 ## cameraPreviewStartPost

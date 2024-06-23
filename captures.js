@@ -14,6 +14,8 @@ let sourceButton = null;
 let sourceImage = null;
 let previewFrameDisplayHeight = null;
 let cameraAddress = null;
+let cameraCaptureMetadata = new Map(); // metadata map from light to metadata json
+const lightOptions = ['ambient', 'white', 'blue'];
 
 // Update firebase database to add session ID to patient
 async function updateCaptureRecord(patientID, sessionId) {
@@ -132,6 +134,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById('framePreview').src = sourceImage.src;
     document.getElementById('framePreview').style.display = 'block'; // Show the preview image
     document.getElementById('galleryDots').style.display = 'block'; // Show the gallery dots
+    document.getElementById('frameMetaData').style.display = 'block'; // Show the metadata display
     document.getElementById('captureBtn').style.display = 'none'; // Hide the capture button
     document.getElementById('confirmCaptureBtn').style.display = 'block'; // Show the confirm capture button
     document.getElementById('retakeCaptureBtn').style.display = 'block'; // Show the cancel capture button
@@ -141,6 +144,7 @@ videoModal.addEventListener('show.bs.modal', async function (event) {
     document.getElementById('framePreview').src = '';
     document.getElementById('framePreview').style.display = 'none'; // Hide the preview image
     document.getElementById('galleryDots').style.display = 'none'; // Hide the gallery dots
+    document.getElementById('frameMetaData').style.display = 'none'; // Hide the metadata display
     document.getElementById('captureBtn').style.display = 'block'; // Show the capture button
     document.getElementById('confirmCaptureBtn').style.display = 'none'; // Hide the confirm capture button
     document.getElementById('retakeCaptureBtn').style.display = 'none'; // Hide the cancel capture button
@@ -198,7 +202,31 @@ function startButtonCountdown(buttonId, duration) {
       clearInterval(intervalId);
       button.textContent = 'Capturing...';
       window.electronAPI.captureRawImage(cameraAddress).then(imagePath => {
-        button.textContent = 'Capturing';
+        // Get job ID from the image path
+        // The image name is formatted as: <jobId>.jpg
+        cameraCaptureMetadata.clear(); // Clear the metadata map
+        try {
+          const jobId = imagePath.split('/').pop().split('.')[0];
+
+          // Get capture frame metadata
+          lightOptions.forEach(light => {
+            window.electronAPI
+              .getCaptureMetadata(cameraAddress, jobId, light)
+              .then(metadata => {
+                cameraCaptureMetadata.set(light, metadata);
+                if (light == 'ambient') {
+                  // TODO: this is a hack to display the metadata for the first light option
+                  // We need this because the preview / textbox update is at preview frame onload time.
+                  // And we likely don't have the metadata at that time.
+                  document.getElementById('frameMetaData').innerHTML = metadata;
+                }
+              })
+            });
+        } catch (error) {
+          console.error('Error parsing image path:', error);
+        }
+
+        button.textContent = 'Capture';
         button.disabled = false; // Re-enable the button
         button.style.display = 'none'; // Hide the capture button
         document.getElementById('confirmCaptureBtn').style.display = 'block'; // Show the confirm capture button
@@ -209,6 +237,7 @@ function startButtonCountdown(buttonId, duration) {
         imgElement.style.display = 'block'; // Show the preview image
         imgElement.style.visibility = 'hidden'; // Hide the preview image
         document.getElementById('galleryDots').style.display = 'block'; // Show the gallery dots
+        document.getElementById('frameMetaData').style.display = 'block'; // Show the metadata display
 
         // Hide the camera preview
         cameraPreviewContainer.style.display = 'none';
@@ -257,6 +286,7 @@ document
     document.getElementById('framePreview').style.display = 'none'; // Hide the preview image
     cameraPreviewContainer.style.display = 'block'; // Show the camera preview
     document.getElementById('galleryDots').style.display = 'none'; // Hide the gallery dots
+    document.getElementById('frameMetaData').style.display = 'none'; // Hide the metadata display
   });
 
 function showPreviewImage(index) {
@@ -268,6 +298,13 @@ function showPreviewImage(index) {
   framePreview.style.transform = `translateY(${offset}px)`;
   dots.forEach(dot => dot.classList.remove('active'));
   dots[index].classList.add('active');
+
+  // Update the metadata display
+  if (cameraCaptureMetadata.has(lightOptions[index])) {
+    const metadata = cameraCaptureMetadata.get(lightOptions[index]);
+    const metadataDisplay = document.getElementById('frameMetaData');
+    metadataDisplay.innerHTML = metadata;
+  }
 }
 
 window.showPreviewImage = showPreviewImage; // expose to html

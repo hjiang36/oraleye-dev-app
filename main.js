@@ -355,3 +355,23 @@ ipcMain.handle('capture-raw-image', async (event, ip) => {
     throw new Error(`Failed to download file: ${error.message}`);
   }
 });
+
+
+// Get capture metadata
+ipcMain.handle('get-capture-metadata', async (event, ip, job_id, light) => {
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
+  var cameraApi = new OralEyeApi.CameraApi(apiClient);
+
+  return new Promise((resolve, reject) => {
+    cameraApi.cameraMetadataGet(job_id, light, (error, data, response) => {
+      if (error) {
+        console.error('Error:', error);
+        reject(error); // Reject the promise with the error
+      } else {
+        resolve(response.text); // Resolve the promise with the text data
+      }
+    });
+  });
+});
