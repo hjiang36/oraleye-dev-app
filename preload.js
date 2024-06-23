@@ -31,7 +31,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setStreamingStatus: (ip, status) =>
     ipcRenderer.send('set-streaming-status', ip, status),
   captureRawImage: ip => ipcRenderer.invoke('capture-raw-image', ip),
-  getCaptureMetadata: (ip, jobId, light) => ipcRenderer.invoke('get-capture-metadata', ip, jobId, light),
+  getCaptureMetadata: (ip, jobId, light) =>
+    ipcRenderer.invoke('get-capture-metadata', ip, jobId, light),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {

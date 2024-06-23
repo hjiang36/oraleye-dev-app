@@ -356,7 +356,6 @@ ipcMain.handle('capture-raw-image', async (event, ip) => {
   }
 });
 
-
 // Get capture metadata
 ipcMain.handle('get-capture-metadata', async (event, ip, job_id, light) => {
   var apiClient = new OralEyeApi.ApiClient(

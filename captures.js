@@ -220,8 +220,8 @@ function startButtonCountdown(buttonId, duration) {
                   // And we likely don't have the metadata at that time.
                   document.getElementById('frameMetaData').innerHTML = metadata;
                 }
-              })
-            });
+              });
+          });
         } catch (error) {
           console.error('Error parsing image path:', error);
         }
