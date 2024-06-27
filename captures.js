@@ -268,17 +268,19 @@ document.getElementById('captureBtn').addEventListener('click', function () {
   }
 });
 
-document.getElementById('focusDistance').addEventListener('change', function () {
-  // Parse the focus distance value to a number
-  const focusDistanceStr = this.value;
-  const focusDistance = parseInt(focusDistanceStr);
-  if (isNaN(focusDistance)) {
-    console.log('Invalid focus distance input: ', focusDistanceStr);
-    return;
-  }
+document
+  .getElementById('focusDistance')
+  .addEventListener('change', function () {
+    // Parse the focus distance value to a number
+    const focusDistanceStr = this.value;
+    const focusDistance = parseInt(focusDistanceStr);
+    if (isNaN(focusDistance)) {
+      console.log('Invalid focus distance input: ', focusDistanceStr);
+      return;
+    }
 
-  window.electronAPI.setFocusDistance(cameraAddress, focusDistance);
-});
+    window.electronAPI.setFocusDistance(cameraAddress, focusDistance);
+  });
 
 document
   .getElementById('confirmCaptureBtn')

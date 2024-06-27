@@ -311,14 +311,17 @@ ipcMain.on('set-exposure-time', (event, ip, exposureTime) => {
 
   // Set the exposure time
   return new Promise((resolve, reject) => {
-    cameraApi.cameraExposurePost({"exposure_time": exposureTime}, (error, data, response) => {
-      if (error) {
-        console.error('Error:', error);
-        reject(error); // Reject the promise with the error
-      } else {
-        resolve(data); // Resolve the promise with the data
+    cameraApi.cameraExposurePost(
+      { exposure_time: exposureTime },
+      (error, data, response) => {
+        if (error) {
+          console.error('Error:', error);
+          reject(error); // Reject the promise with the error
+        } else {
+          resolve(data); // Resolve the promise with the data
+        }
       }
-    });
+    );
   });
 });
 
@@ -333,34 +336,40 @@ ipcMain.on('set-focus-distance', (event, ip, focusDistance) => {
   if (focusDistance <= 0) {
     // Set the focus distance to auto
     return new Promise((resolve, reject) => {
-      cameraApi.cameraAutofocusPost({'autofocus': 'on'}, (error, data, response) => {
-        if (error) {
-          console.error('Error:', error);
-          reject(error); // Reject the promise with the error
-        } else {
-          resolve(data); // Resolve the promise with the data
+      cameraApi.cameraAutofocusPost(
+        { autofocus: 'on' },
+        (error, data, response) => {
+          if (error) {
+            console.error('Error:', error);
+            reject(error); // Reject the promise with the error
+          } else {
+            resolve(data); // Resolve the promise with the data
+          }
         }
-      });
-    })
+      );
+    });
   } else {
     // Set autofocus to off and set the focus distance
-    cameraApi.cameraAutofocusPost({'autofocus': 'off'}, (error, data, response) => {
-      console.log('Autofocus off');
-      return new Promise((resolve, reject) => {
-        cameraApi.cameraManualFocusPost(
-          {'distance': focusDistance},
-          (error, data, response) => {
-            if (error) {
-              console.error('Error:', error);
-              reject(error); // Reject the promise with the error
-            } else {
-              console.log('Manual focus set');
-              resolve(data); // Resolve the promise with the data
+    cameraApi.cameraAutofocusPost(
+      { autofocus: 'off' },
+      (error, data, response) => {
+        console.log('Autofocus off');
+        return new Promise((resolve, reject) => {
+          cameraApi.cameraManualFocusPost(
+            { distance: focusDistance },
+            (error, data, response) => {
+              if (error) {
+                console.error('Error:', error);
+                reject(error); // Reject the promise with the error
+              } else {
+                console.log('Manual focus set');
+                resolve(data); // Resolve the promise with the data
+              }
             }
-          }
-        );
-      })
-    });
+          );
+        });
+      }
+    );
   }
 });
 
