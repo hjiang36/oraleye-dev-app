@@ -250,6 +250,15 @@ document.getElementById('captureBtn').addEventListener('click', function () {
   const delayInputValue = document.getElementById('delayInput').value;
   const delayInSeconds = parseInt(delayInputValue, 10); // Convert the value to an integer
 
+  // Check if the exposure time is set
+  const exposureTimeStr = document.getElementById('exposureDuration').value;
+  const exposureTime = parseInt(exposureTimeStr, 10);
+  if (!isNaN(exposureTime) && exposureTime > 0) {
+    window.electronAPI.setExposureTime(cameraAddress, exposureTime);
+  } else {
+    console.log('Invalid exposure time input: ', exposureTimeStr);
+  }
+
   // Check if the input is a number and greater than zero
   if (!isNaN(delayInSeconds) && delayInSeconds > 0) {
     startButtonCountdown('captureBtn', delayInSeconds);
@@ -258,6 +267,20 @@ document.getElementById('captureBtn').addEventListener('click', function () {
     startButtonCountdown('captureBtn', 0);
   }
 });
+
+document
+  .getElementById('focusDistance')
+  .addEventListener('change', function () {
+    // Parse the focus distance value to a number
+    const focusDistanceStr = this.value;
+    const focusDistance = parseInt(focusDistanceStr);
+    if (isNaN(focusDistance)) {
+      console.log('Invalid focus distance input: ', focusDistanceStr);
+      return;
+    }
+
+    window.electronAPI.setFocusDistance(cameraAddress, focusDistance);
+  });
 
 document
   .getElementById('confirmCaptureBtn')

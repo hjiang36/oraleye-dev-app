@@ -33,6 +33,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   captureRawImage: ip => ipcRenderer.invoke('capture-raw-image', ip),
   getCaptureMetadata: (ip, jobId, light) =>
     ipcRenderer.invoke('get-capture-metadata', ip, jobId, light),
+  setExposureTime: (ip, exposureTime) =>
+    ipcRenderer.send('set-exposure-time', ip, exposureTime),
+  setFocusDistance: (ip, focusDistance) =>
+    ipcRenderer.send('set-focus-distance', ip, focusDistance),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {
