@@ -446,3 +446,64 @@ ipcMain.handle('get-capture-metadata', async (event, ip, job_id, light) => {
     });
   });
 });
+
+// Download captured raw image
+ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
+  var apiClient = new OralEyeApi.ApiClient(
+    (basePath = 'http://' + ip + ':8080')
+  );
+  var cameraApi = new OralEyeApi.CameraApi(apiClient);
+
+  try {
+    const chunks = [];
+    cameraApi.cameraDownloadRawGet(job_id, light, (error, data, response) => {
+      if (error) {
+        throw error;
+      }
+
+      // Get the filename
+      const contentDisposition = response.headers['content-disposition'];
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : 'unknown.raw';
+      const outputPath = path.join(app.getPath('userData'), filename);
+
+      // Ensure response is a readable stream
+      if (!response || typeof response.on !== 'function') {
+        return reject(new Error('Invalid response stream from API call'));
+      }
+
+      // Attach listeners immediately
+      var bytesReceived = 0;
+      const totalBytes = parseInt(response.headers['content-length'], 10);
+      response.on('data', chunk => {
+        // Update progress and send to renderer
+        bytesReceived += chunk.length;
+        const progress = (bytesReceived / totalBytes) * 100;
+        event.reply(
+          'download-captured-image-progress',
+          progress
+        );
+        chunks.push(chunk);
+      });
+
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        fs.writeFile(outputPath, buffer, err => {
+          if (err) {
+            throw err;
+          } else {
+            event.reply('download-captured-image-response', outputPath);
+          }
+        });
+      });
+
+      response.on('error', error => {
+        console.error('Stream error:', error);
+        throw error;
+      });
+    });
+  } catch (error) {
+    throw new Error(`Failed to download file: ${error.message}`);
+  }
+});

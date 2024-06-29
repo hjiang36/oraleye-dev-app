@@ -15,6 +15,7 @@ let sourceImage = null;
 let previewFrameDisplayHeight = null;
 let cameraAddress = null;
 let cameraCaptureMetadata = new Map(); // metadata map from light to metadata json
+let jobId = null;
 const lightOptions = ['ambient', 'white', 'blue'];
 
 // Update firebase database to add session ID to patient
@@ -206,7 +207,7 @@ function startButtonCountdown(buttonId, duration) {
         // The image name is formatted as: <jobId>.jpg
         cameraCaptureMetadata.clear(); // Clear the metadata map
         try {
-          const jobId = imagePath.split('/').pop().split('.')[0];
+          jobId = imagePath.split('/').pop().split('.')[0];
 
           // Get capture frame metadata
           lightOptions.forEach(light => {
@@ -297,6 +298,32 @@ document
       sourceImage.style.height = `${imageHeight}px`;
       sourceImage.style.visibility = 'visible'; // Show the preview image
     };
+
+    // Start to download the raw file and show the download progress
+    if (sourceImage && jobId) {
+      const loadingOverlay = sourceImage.nextElementSibling;
+      if (
+        loadingOverlay &&
+        loadingOverlay.classList.contains('loading-overlay')
+      ) {
+        // Show the loading overlay
+        loadingOverlay.style.visibility = 'visible';
+
+        // Use querySelector to get the spinner within the loading overlay
+        const progressText = loadingOverlay.querySelector('.progress-text');
+        window.electronAPI
+          .downloadRawCapture(cameraAddress, jobId, lightOptions[2], progress => {
+            if (progressText) {
+              progressText.textContent = `${Math.round(progress)}%`;
+            }
+          })
+          .then(filePath => {
+            // Hide the loading overlay
+            loadingOverlay.style.visibility = 'hidden';
+            console.log('Downloaded image to: ', filePath);
+          });
+      }
+    }
   });
 
 document

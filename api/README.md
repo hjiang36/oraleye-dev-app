@@ -121,6 +121,7 @@ All URIs are relative to _http://localhost_
 | ---------------------- | ---------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------ |
 | _OralEyeApi.CameraApi_ | [**cameraAutofocusPost**](docs/CameraApi.md#cameraAutofocusPost)             | **POST** /camera/autofocus         | Set auto-focus on/off                            |
 | _OralEyeApi.CameraApi_ | [**cameraCapturePost**](docs/CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image                                |
+| _OralEyeApi.CameraApi_ | [**cameraDownloadRawGet**](docs/CameraApi.md#cameraDownloadRawGet)           | **GET** /camera/download_raw       | Download raw file of a capture                   |
 | _OralEyeApi.CameraApi_ | [**cameraExposurePost**](docs/CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time                                |
 | _OralEyeApi.CameraApi_ | [**cameraManualFocusPost**](docs/CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance                        |
 | _OralEyeApi.CameraApi_ | [**cameraMetadataGet**](docs/CameraApi.md#cameraMetadataGet)                 | **GET** /camera/metadata           | Retrieve metadata of a capture                   |

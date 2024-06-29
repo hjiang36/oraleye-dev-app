@@ -25,4 +25,3 @@ src/model/CameraMetadataGet200Response.js
 src/model/LightsBlueMaxTimePostRequest.js
 src/model/LightsControlPost200Response.js
 src/model/LightsStatusGet200Response.js
-test/model/CameraMetadataGet200Response.spec.js

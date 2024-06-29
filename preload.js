@@ -19,6 +19,20 @@ function getLocalIPAddress() {
   });
 }
 
+function downloadRawCapture(ip, jobId, light, progressCallback) {
+  return new Promise(resolve => {
+    ipcRenderer.on('download-captured-image-progress', (event, progress) => {
+      progressCallback(progress);
+    });
+
+    ipcRenderer.once('download-captured-image-response', (event, filePath) => {
+      resolve(filePath);
+    });
+
+    ipcRenderer.send('download-captured-image', ip, jobId, light);
+  });
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   saveImage: (imageBuffer, filePath) =>
     ipcRenderer.invoke('saveImage', imageBuffer, filePath),
@@ -37,6 +51,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send('set-exposure-time', ip, exposureTime),
   setFocusDistance: (ip, focusDistance) =>
     ipcRenderer.send('set-focus-distance', ip, focusDistance),
+  downloadRawCapture: (ip, jobId, light, progressCallback) =>
+    downloadRawCapture(ip, jobId, light, progressCallback),
 });
 
 contextBridge.exposeInMainWorld('nodeAPI', {

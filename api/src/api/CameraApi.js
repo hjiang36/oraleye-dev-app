@@ -91,7 +91,7 @@ export default class CameraApi {
    * Callback function to receive the result of the cameraCapturePost operation.
    * @callback module:api/CameraApi~cameraCapturePostCallback
    * @param {String} error Error message, if any.
-   * @param {File} data The data returned by the service call.
+   * @param {Buffer} data The data returned by the service call.
    * @param {String} response The complete HTTP response.
    */
 
@@ -115,6 +115,65 @@ export default class CameraApi {
     return this.apiClient.callApi(
       '/camera/capture',
       'POST',
+      pathParams,
+      queryParams,
+      headerParams,
+      formParams,
+      postBody,
+      authNames,
+      contentTypes,
+      accepts,
+      returnType,
+      null,
+      callback
+    );
+  }
+
+  /**
+   * Callback function to receive the result of the cameraDownloadRawGet operation.
+   * @callback module:api/CameraApi~cameraDownloadRawGetCallback
+   * @param {String} error Error message, if any.
+   * @param {Buffer} data The data returned by the service call.
+   * @param {String} response The complete HTTP response.
+   */
+
+  /**
+   * Download raw file of a capture
+   * @param {String} jobId
+   * @param {module:model/String} light
+   * @param {module:api/CameraApi~cameraDownloadRawGetCallback} callback The callback function, accepting three arguments: error, data, response
+   * data is of type: {@link Buffer}
+   */
+  cameraDownloadRawGet(jobId, light, callback) {
+    let postBody = null;
+    // verify the required parameter 'jobId' is set
+    if (jobId === undefined || jobId === null) {
+      throw new Error(
+        "Missing the required parameter 'jobId' when calling cameraDownloadRawGet"
+      );
+    }
+    // verify the required parameter 'light' is set
+    if (light === undefined || light === null) {
+      throw new Error(
+        "Missing the required parameter 'light' when calling cameraDownloadRawGet"
+      );
+    }
+
+    let pathParams = {};
+    let queryParams = {
+      job_id: jobId,
+      light: light,
+    };
+    let headerParams = {};
+    let formParams = {};
+
+    let authNames = [];
+    let contentTypes = [];
+    let accepts = ['application/octet-stream', 'application/json'];
+    let returnType = Buffer;
+    return this.apiClient.callApi(
+      '/camera/download_raw',
+      'GET',
       pathParams,
       queryParams,
       headerParams,
@@ -388,7 +447,7 @@ export default class CameraApi {
    * Get MJPEG video feed
    * Streams MJPEG video feed from the camera
    * @param {module:api/CameraApi~cameraPreviewVideoFeedGetCallback} callback The callback function, accepting three arguments: error, data, response
-   * data is of type: {@link Buffer}
+   * data is of type: {@link File}
    */
   cameraPreviewVideoFeedGet(callback) {
     let postBody = null;
