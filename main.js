@@ -480,10 +480,7 @@ ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
         // Update progress and send to renderer
         bytesReceived += chunk.length;
         const progress = (bytesReceived / totalBytes) * 100;
-        event.reply(
-          'download-captured-image-progress',
-          progress
-        );
+        event.reply('download-captured-image-progress', progress);
         chunks.push(chunk);
       });
 

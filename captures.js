@@ -312,11 +312,16 @@ document
         // Use querySelector to get the spinner within the loading overlay
         const progressText = loadingOverlay.querySelector('.progress-text');
         window.electronAPI
-          .downloadRawCapture(cameraAddress, jobId, lightOptions[2], progress => {
-            if (progressText) {
-              progressText.textContent = `${Math.round(progress)}%`;
+          .downloadRawCapture(
+            cameraAddress,
+            jobId,
+            lightOptions[2],
+            progress => {
+              if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
+              }
             }
-          })
+          )
           .then(filePath => {
             // Hide the loading overlay
             loadingOverlay.style.visibility = 'hidden';
