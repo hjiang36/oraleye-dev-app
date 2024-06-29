@@ -6,6 +6,7 @@ All URIs are relative to _http://localhost_
 | ----------------------------------------------------------------------- | ---------------------------------- | ------------------------------ |
 | [**cameraAutofocusPost**](CameraApi.md#cameraAutofocusPost)             | **POST** /camera/autofocus         | Set auto-focus on/off          |
 | [**cameraCapturePost**](CameraApi.md#cameraCapturePost)                 | **POST** /camera/capture           | Capture raw image              |
+| [**cameraDownloadRawGet**](CameraApi.md#cameraDownloadRawGet)           | **GET** /camera/download_raw       | Download raw file of a capture |
 | [**cameraExposurePost**](CameraApi.md#cameraExposurePost)               | **POST** /camera/exposure          | Set exposure time              |
 | [**cameraManualFocusPost**](CameraApi.md#cameraManualFocusPost)         | **POST** /camera/manual_focus      | Set manual focus distance      |
 | [**cameraMetadataGet**](CameraApi.md#cameraMetadataGet)                 | **GET** /camera/metadata           | Retrieve metadata of a capture |
@@ -94,6 +95,49 @@ No authorization required
 
 - **Content-Type**: Not defined
 - **Accept**: application/octet-stream
+
+## cameraDownloadRawGet
+
+> File cameraDownloadRawGet(jobId, light)
+
+Download raw file of a capture
+
+### Example
+
+```javascript
+import OralEyeApi from 'oral_eye_api';
+
+let apiInstance = new OralEyeApi.CameraApi();
+let jobId = 'jobId_example'; // String |
+let light = 'light_example'; // String |
+apiInstance.cameraDownloadRawGet(jobId, light, (error, data, response) => {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+});
+```
+
+### Parameters
+
+| Name      | Type       | Description | Notes |
+| --------- | ---------- | ----------- | ----- |
+| **jobId** | **String** |             |
+| **light** | **String** |             |
+
+### Return type
+
+**File**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/octet-stream, application/json
 
 ## cameraExposurePost
 
