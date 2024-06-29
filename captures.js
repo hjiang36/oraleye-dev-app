@@ -315,17 +315,45 @@ document
           .downloadRawCapture(
             cameraAddress,
             jobId,
-            lightOptions[2],
+            lightOptions[0],
             progress => {
               if (progressText) {
-                progressText.textContent = `${Math.round(progress)}%`;
+                progressText.textContent = `${Math.round(progress / 3)}%`;
               }
             }
           )
           .then(filePath => {
-            // Hide the loading overlay
-            loadingOverlay.style.visibility = 'hidden';
             console.log('Downloaded image to: ', filePath);
+            window.electronAPI
+              .downloadRawCapture(
+                cameraAddress,
+                jobId,
+                lightOptions[1],
+                progress => {
+                  if (progressText) {
+                    progressText.textContent = `${Math.round(progress / 3) + 33}%`;
+                  }
+                }
+              )
+              .then(filePath => {
+                console.log('Downloaded image to: ', filePath);
+                window.electronAPI
+                  .downloadRawCapture(
+                    cameraAddress,
+                    jobId,
+                    lightOptions[2],
+                    progress => {
+                      if (progressText) {
+                        progressText.textContent = `${Math.round(progress / 3) + 66}%`;
+                      }
+                    }
+                  )
+                  .then(filePath => {
+                    // Hide the loading overlay
+                    loadingOverlay.style.visibility = 'hidden';
+                    console.log('Downloaded image to: ', filePath);
+                  });
+              });
           });
       }
     }
