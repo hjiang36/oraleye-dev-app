@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "bonjour": "^3.5.0",
-    "oral_eye_api": "file:api"
+    "oral_eye_api": "file:api",
+    "pngjs": "^7.0.0"
   }
 }
