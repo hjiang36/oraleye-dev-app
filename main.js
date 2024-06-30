@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
+const { PNG } = require('pngjs');
 var OralEyeApi = require('oral_eye_api');
 
 const net = require('net');
@@ -13,6 +14,7 @@ const axios = require('axios');
 const store = new Store();
 
 const { Storage } = require('@google-cloud/storage');
+const { stdin } = require('process');
 const gcStorage = new Storage();
 const bucketName = 'session-images';
 
@@ -447,6 +449,57 @@ ipcMain.handle('get-capture-metadata', async (event, ip, job_id, light) => {
   });
 });
 
+// Convert raw image to PNG
+function saveAsPNG(rawData, outputPath) {
+  // TODO: Currently these are harded coded values for the OralEye camera
+  //       We should get these values from the camera API in the future.
+  const width = 4608;
+  const height = 2592;
+  const bitDepth = 10;
+  const stride = Math.ceil((width * bitDepth) / 8);
+
+  console.log('Converting raw image to PNG with stride:', stride);
+
+  if (rawData.length !== height * stride) {
+    throw new Error('Invalid file size');
+  }
+
+  const rawImage = Buffer.alloc(width * height * 2); // 16-bit data
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const byteIndex = y * stride + Math.floor(x / 4) * 5;
+      let pixelValue = rawData[byteIndex + (x % 4)] * 4; // high 8 bits
+      pixelValue += (rawData[byteIndex + 4] >> (6 - 2 * (x % 4))) & 0x03;
+
+      // Normalize 10-bit pixel values to 16-bit
+      pixelValue = pixelValue * 64;
+      rawImage.writeUInt16BE(pixelValue, (y * width + x) * 2);
+    }
+  }
+
+  // Create a new PNG image
+  const png = new PNG({
+    width: width,
+    height: height,
+    inputHasAlpha: false,
+    inputColorType: 0,
+    bitDepth: 16,
+    colorType: 0,
+  });
+
+  // Copy the processed image data to the PNG data buffer
+  png.data = rawImage;
+
+  // Write the PNG file
+  png
+    .pack()
+    .pipe(fs.createWriteStream(outputPath))
+    .on('finish', () => {
+      console.log('Image written to file: ', outputPath);
+    });
+}
+
 // Download captured raw image
 ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
   var apiClient = new OralEyeApi.ApiClient(
@@ -466,7 +519,12 @@ ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
       const filename = contentDisposition
         ? contentDisposition.split('filename=')[1].replace(/"/g, '')
         : 'unknown.raw';
-      const outputPath = path.join(app.getPath('userData'), filename);
+
+      // Replace .raw to .png
+      const outputPath = path.join(
+        app.getPath('userData'),
+        filename.replace('.raw', '.png')
+      );
 
       // Ensure response is a readable stream
       if (!response || typeof response.on !== 'function') {
@@ -486,13 +544,8 @@ ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
 
       response.on('end', () => {
         const buffer = Buffer.concat(chunks);
-        fs.writeFile(outputPath, buffer, err => {
-          if (err) {
-            throw err;
-          } else {
-            event.reply('download-captured-image-response', outputPath);
-          }
-        });
+        saveAsPNG(buffer, outputPath);
+        event.reply('download-captured-image-response', outputPath);
       });
 
       response.on('error', error => {
