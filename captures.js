@@ -320,7 +320,8 @@ document
               if (progressText) {
                 progressText.textContent = `${Math.round(progress / 3)}%`;
               }
-            }
+            },
+            cameraCaptureMetadata.get(lightOptions[0])
           )
           .then(filePath => {
             console.log('Downloaded image to: ', filePath);
@@ -333,7 +334,8 @@ document
                   if (progressText) {
                     progressText.textContent = `${Math.round(progress / 3) + 33}%`;
                   }
-                }
+                },
+                cameraCaptureMetadata.get(lightOptions[1])
               )
               .then(filePath => {
                 console.log('Downloaded image to: ', filePath);
@@ -346,7 +348,8 @@ document
                       if (progressText) {
                         progressText.textContent = `${Math.round(progress / 3) + 66}%`;
                       }
-                    }
+                    },
+                    cameraCaptureMetadata.get(lightOptions[2])
                   )
                   .then(filePath => {
                     // Hide the loading overlay

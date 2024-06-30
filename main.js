@@ -4,6 +4,9 @@ const os = require('os');
 const Store = require('electron-store');
 const bonjour = require('bonjour')();
 const { PNG } = require('pngjs');
+const extract = require('png-chunks-extract');
+const encode = require('png-chunks-encode');
+const textChunk = require('png-chunk-text');
 var OralEyeApi = require('oral_eye_api');
 
 const net = require('net');
@@ -355,7 +358,6 @@ ipcMain.on('set-focus-distance', (event, ip, focusDistance) => {
     cameraApi.cameraAutofocusPost(
       { autofocus: 'off' },
       (error, data, response) => {
-        console.log('Autofocus off');
         return new Promise((resolve, reject) => {
           cameraApi.cameraManualFocusPost(
             { distance: focusDistance },
@@ -364,7 +366,6 @@ ipcMain.on('set-focus-distance', (event, ip, focusDistance) => {
                 console.error('Error:', error);
                 reject(error); // Reject the promise with the error
               } else {
-                console.log('Manual focus set');
                 resolve(data); // Resolve the promise with the data
               }
             }
@@ -449,16 +450,28 @@ ipcMain.handle('get-capture-metadata', async (event, ip, job_id, light) => {
   });
 });
 
+function addMetadataToPNG(inputPath, outputPath, metadata) {
+  const buffer = fs.readFileSync(inputPath);
+  const chunks = extract(buffer);
+
+  // Add text chunks for each metadata entry
+  Object.entries(metadata).forEach(([key, value]) => {
+    const textData = textChunk.encode(key, metadata[key]);
+    chunks.splice(-1, 0, textData); // Insert before the IEND chunk
+  });
+
+  const outputBuffer = Buffer.from(encode(chunks));
+  fs.writeFileSync(outputPath, outputBuffer);
+}
+
 // Convert raw image to PNG
-function saveAsPNG(rawData, outputPath) {
+function saveAsPNG(rawData, outputPath, metadata) {
   // TODO: Currently these are harded coded values for the OralEye camera
   //       We should get these values from the camera API in the future.
   const width = 4608;
   const height = 2592;
   const bitDepth = 10;
   const stride = Math.ceil((width * bitDepth) / 8);
-
-  console.log('Converting raw image to PNG with stride:', stride);
 
   if (rawData.length !== height * stride) {
     throw new Error('Invalid file size');
@@ -496,64 +509,70 @@ function saveAsPNG(rawData, outputPath) {
     .pack()
     .pipe(fs.createWriteStream(outputPath))
     .on('finish', () => {
+      if (metadata) {
+        addMetadataToPNG(outputPath, outputPath, JSON.parse(metadata));
+      }
       console.log('Image written to file: ', outputPath);
     });
 }
 
 // Download captured raw image
-ipcMain.on('download-captured-image', async (event, ip, job_id, light) => {
-  var apiClient = new OralEyeApi.ApiClient(
-    (basePath = 'http://' + ip + ':8080')
-  );
-  var cameraApi = new OralEyeApi.CameraApi(apiClient);
+ipcMain.on(
+  'download-captured-image',
+  async (event, ip, job_id, light, metadata) => {
+    var apiClient = new OralEyeApi.ApiClient(
+      (basePath = 'http://' + ip + ':8080')
+    );
+    var cameraApi = new OralEyeApi.CameraApi(apiClient);
 
-  try {
-    const chunks = [];
-    cameraApi.cameraDownloadRawGet(job_id, light, (error, data, response) => {
-      if (error) {
-        throw error;
-      }
+    try {
+      const chunks = [];
+      cameraApi.cameraDownloadRawGet(job_id, light, (error, data, response) => {
+        if (error) {
+          throw error;
+        }
 
-      // Get the filename
-      const contentDisposition = response.headers['content-disposition'];
-      const filename = contentDisposition
-        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-        : 'unknown.raw';
+        // Get the filename
+        const contentDisposition = response.headers['content-disposition'];
+        const filename = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : 'unknown.raw';
 
-      // Replace .raw to .png
-      const outputPath = path.join(
-        app.getPath('userData'),
-        filename.replace('.raw', '.png')
-      );
+        // Replace .raw to .png
+        const outputPath = path.join(
+          app.getPath('userData'),
+          filename.replace('.raw', '.png')
+        );
 
-      // Ensure response is a readable stream
-      if (!response || typeof response.on !== 'function') {
-        return reject(new Error('Invalid response stream from API call'));
-      }
+        // Ensure response is a readable stream
+        if (!response || typeof response.on !== 'function') {
+          return reject(new Error('Invalid response stream from API call'));
+        }
 
-      // Attach listeners immediately
-      var bytesReceived = 0;
-      const totalBytes = parseInt(response.headers['content-length'], 10);
-      response.on('data', chunk => {
-        // Update progress and send to renderer
-        bytesReceived += chunk.length;
-        const progress = (bytesReceived / totalBytes) * 100;
-        event.reply('download-captured-image-progress', progress);
-        chunks.push(chunk);
+        // Attach listeners immediately
+        var bytesReceived = 0;
+        const totalBytes = parseInt(response.headers['content-length'], 10);
+        response.on('data', chunk => {
+          // Update progress and send to renderer
+          bytesReceived += chunk.length;
+          const progress = (bytesReceived / totalBytes) * 100;
+          event.reply('download-captured-image-progress', progress);
+          chunks.push(chunk);
+        });
+
+        response.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          saveAsPNG(buffer, outputPath, metadata);
+          event.reply('download-captured-image-response', outputPath);
+        });
+
+        response.on('error', error => {
+          console.error('Stream error:', error);
+          throw error;
+        });
       });
-
-      response.on('end', () => {
-        const buffer = Buffer.concat(chunks);
-        saveAsPNG(buffer, outputPath);
-        event.reply('download-captured-image-response', outputPath);
-      });
-
-      response.on('error', error => {
-        console.error('Stream error:', error);
-        throw error;
-      });
-    });
-  } catch (error) {
-    throw new Error(`Failed to download file: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Failed to download file: ${error.message}`);
+    }
   }
-});
+);

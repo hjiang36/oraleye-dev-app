@@ -28,6 +28,9 @@
   "dependencies": {
     "bonjour": "^3.5.0",
     "oral_eye_api": "file:api",
+    "png-chunk-text": "^1.0.0",
+    "png-chunks-encode": "^1.0.0",
+    "png-chunks-extract": "^1.0.0",
     "pngjs": "^7.0.0"
   }
 }
