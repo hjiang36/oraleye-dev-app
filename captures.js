@@ -207,7 +207,9 @@ function startButtonCountdown(buttonId, duration) {
         // The image name is formatted as: <jobId>.jpg
         cameraCaptureMetadata.clear(); // Clear the metadata map
         try {
-          jobId = imagePath.split('/').pop().split('.')[0];
+          // Replace backslashes with forward slashes so that the it works for windows
+          const normalizedPath = imagePath.replace(/\\/g, '/');
+          jobId = normalizedPath.split('/').pop().split('.')[0];
 
           // Get capture frame metadata
           lightOptions.forEach(light => {
