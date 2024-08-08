@@ -80,7 +80,17 @@ app.on('window-all-closed', () => {
   bonjour.destroy();
 });
 
+
 let deviceList = [];
+
+let btn = document.getElementById("ip-input");
+btn.addEventListener("click", function () {
+    let ipp = document.getElementById("correct-IP").value;
+    setIP(ipp);
+});
+function setIP(n) {
+    deviceList = [{ name: 'OralEye HardCoded', addresses: [n] }];
+}
 function discoverCameras() {
   // Browse for all _camera._tcp services
   const browser = bonjour.find({ type: 'http' });
